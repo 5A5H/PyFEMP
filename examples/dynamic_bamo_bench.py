@@ -1,5 +1,5 @@
-# TEST for FiniteElement in coupled problems 
-# for the dynamic terms including inertia and damping 
+# TEST for FiniteElement in coupled problems
+# for the dynamic terms including inertia and damping
 
 import numpy as np
 import matplotlib.pyplot as plt

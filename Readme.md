@@ -5,3 +5,5 @@ Hence it should be easy to be used.
 
 Although the program is very simple, it allows for multiple nodal degrees of freedom,
 and time dependent analysis.
+
+The program relies on a single class definition which represents a simulation, acompanied with an exchangeable finite element file.
