@@ -1,0 +1,7 @@
+#ignore .vtu .csv .log files
+*.vtu
+*.csv
+*.log
+
+#ignore mac specific files
+*.DS_Store
