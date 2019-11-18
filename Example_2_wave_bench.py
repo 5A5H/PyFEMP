@@ -1,10 +1,11 @@
-# TEST for FiniteElement in coupled problems 
-# for the dynamic terms including inertia and damping 
+# TEST for FiniteElement in coupled problems
+# for the dynamic terms including inertia and damping
 
 import numpy as np
 import matplotlib.pyplot as plt
+
 from FEM_1D_SOLVER import FEM1D
-import Elmt_BaMo_BaEn_Coupled_1D as ELEMENT
+import elements.Elmt_BaMo_BaEn_Coupled_1D as ELEMENT
 
 # Create FEM Instance
 FEM = FEM1D(ELEMENT)
@@ -27,7 +28,7 @@ def PlotDomain():
   plt.xlim(0,100)
   plt.ylim(-0.2,0.2)
   plt.title('t=%f4'%FEM.time)
-  plt.show()  
+  plt.show()
 
 # define a loading function
 def load(time):

@@ -5,7 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from FEM_1D_SOLVER import FEM1D
-import Elmt_BaMo_BaEn_Coupled_1D as ELEMENT
+import elements.Elmt_BaMo_BaEn_Coupled_1D as ELEMENT
+
 
 # Create FEM Instance
 FEM = FEM1D(ELEMENT)
