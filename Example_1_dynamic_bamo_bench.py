@@ -1,15 +1,15 @@
 # TEST for FiniteElement in coupled problems
-# for the dynamic terms including inertia and damping
+# for the dynamic terms including inertia and damping 
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-from FEM_1D_SOLVER import FEM1D
-import elements.Elmt_BaMo_BaEn_Coupled_1D as ELEMENT
+import FEM_1D
+import FEM_1D.elements.Elmt_BaMo_BaEn_Coupled_1D as ELEMENT
 
 
 # Create FEM Instance
-FEM = FEM1D(ELEMENT)
+FEM = FEM_1D.FEM_Simulation(ELEMENT)
 FEM.Add_Mesh(9.0,1)
 FEM.Add_Material([5,1.2,10,1,0,0],"All")
 FEM.Add_EBC("x==0","U",0)
@@ -19,7 +19,7 @@ FEM.Analysis()
 
 # define a loading function
 def load(time):
-  lam = 0.0;
+  lam = 0.0
   if time <= 10:
     lam = (time/10)
   if time > 10:
@@ -46,4 +46,22 @@ for step in range(nStep):
 plt.plot(rec_t,rec_u)
 plt.xlabel('t')
 plt.ylabel('u')
+plt.show()
+
+
+#Plot Accelerations,Stresses over 1D domain
+plt.figure(1,figsize=[20,5])
+
+XI, SigI = FEM.PostProcessing("Sig")
+plt.subplot(121)
+plt.plot(XI,SigI)
+plt.xlabel('x')
+plt.ylabel('$\sigma$')
+
+XI, A = FEM.PostProcessing("A")
+plt.subplot(122)
+plt.plot(XI,A)
+plt.xlabel('x')
+plt.ylabel('a')
+
 plt.show()

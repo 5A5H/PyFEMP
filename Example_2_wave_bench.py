@@ -4,11 +4,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from FEM_1D_SOLVER import FEM1D
-import elements.Elmt_BaMo_BaEn_Coupled_1D as ELEMENT
+import FEM_1D
+import FEM_1D.elements.Elmt_BaMo_BaEn_Coupled_1D as ELEMENT
 
 # Create FEM Instance
-FEM = FEM1D(ELEMENT)
+FEM = FEM_1D.FEM_Simulation(ELEMENT)
 FEM.verbose_system = False
 FEM.Add_Mesh(100.0,100)
 FEM.Add_Material([100,1,1,100,0,0],"All")
@@ -28,11 +28,11 @@ def PlotDomain():
   plt.xlim(0,100)
   plt.ylim(-0.2,0.2)
   plt.title('t=%f4'%FEM.time)
-  plt.show()
+  plt.pause(.1)
 
 # define a loading function
 def load(time):
-  lam = 0.0;
+  lam = 0.0
   if time <= 5:
     lam = (time/5)
   if time > 5:
