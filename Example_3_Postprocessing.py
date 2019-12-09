@@ -40,7 +40,7 @@ TI = FEM.DI[1::2]
 plt.subplot(222)
 plt.plot(XI,TI)
 plt.xlabel('x')
-plt.ylabel('$u$')
+plt.ylabel('$T$')
 
 XI, SigI = FEM.PostProcessing("Sig")
 plt.subplot(223)
