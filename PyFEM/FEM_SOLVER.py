@@ -35,6 +35,8 @@ class FEM_Simulation:
         self.NoElements = 0
         self.NoNodes = 0
         self.NoDofs = 0
+        self.XI = 0
+        self.ELEM = 0
 
         # initialize fields for boundary conditions
         self.NBC = []
@@ -47,27 +49,6 @@ class FEM_Simulation:
         print("FEM Solver Instance Created")
 
 
-    # def Add_1DMesh(self, DomainLength, NumberOfElements):
-    #     '''Sets a linear space of finite elements'''
-
-    #     if self.state != 0:
-    #         self.state_report()
-    #         return
-
-    #     self.NoElements = NumberOfElements
-    #     self.GlobalDomainLength = DomainLength
-    #     self.NoNodes = self.NoElements + 1
-    #     self.NoDofs = self.NoNodes * self.NoNodeDofs
-
-    #     self.XI = np.linspace(0.0, self.GlobalDomainLength,
-    #                           num=self.NoElements + 1)
-    #     self.DI = np.zeros(self.NoDofs)
-    #     self.h_n = np.zeros(self.NoElements * self.NoElementHistory)
-    #     self.h_t = np.zeros(self.NoElements * self.NoElementHistory)
-
-    #     if (self.verbose):
-    #         print(' Finite Elemenmts Created')
-    #     self.state = 1
 
     def Add_Mesh(self, NodesList, ElementConnectivity, verbose=False):
         ''' 
@@ -89,6 +70,20 @@ class FEM_Simulation:
         if (self.NoElementDim != mesh_dim): raise NameError('Mesh dimension is not the same as elements.')
         if (self.NoElementNodes != mesh_no_el): raise NameError('Mesh is not compatible to element topology.')
 
+        # process infos
+        self.NoElements = no_mesh_el
+        self.NoNodes = no_mesh_no
+        self.NoDofs = no_mesh_no * self.NoNodeDofs
+        if (verbose): print('Mesh Total Dofs       : ',self.NoDofs)
+
+        self.XI = NodesList
+        self.ELEM = ElementConnectivity
+
+        if (self.verbose): print(' Finite Elemenmt Mesh Read!')
+        self.state = 1
+
+
+
 
     def Add_Material(self, MaterialList, Option=None):
         '''Adds Material parameters as a list [....] for the next element without already specified material. With Option=All, all elements are set with the given list of parameters.'''
@@ -97,7 +92,7 @@ class FEM_Simulation:
                 'Error: Number of material parameter does not fit element requirements!')
             print('       Requred parameters are :')
             print(*self.ElementMaterialNames, sep=", ")
-            return
+            raise NameError('Error processing material parameters!')
 
         if Option == "All":
             self.ElementMaterial = []
@@ -109,6 +104,8 @@ class FEM_Simulation:
             self.ElementMaterial.append(MaterialList)
             print(' Material set for Element %i' % len(self.ElementMaterial))
 
+    
+    
     def Add_EBC(self, NodeSelector, DofSelector, Value):
         '''Sets an essential boundary condition by NodeSelector, DofSelector, Value'''
         NodeList = self.SelectNodes(NodeSelector)
@@ -119,6 +116,8 @@ class FEM_Simulation:
         for node in NodeList:
             self.EBC.append([node, AffectedDof, Value])
 
+    
+    
     def Add_NBC(self, NodeSelector, DofSelector, Value):
         '''Sets an essential boundary condition by NodeSelector, DofSelector, Value'''
         NodeList = self.SelectNodes(NodeSelector)
@@ -139,8 +138,15 @@ class FEM_Simulation:
                     return i
         return 100
 
+
     def SelectNodes(self, Input):
-        '''Returns a list containing the node number that fit the input'''
+        '''
+        Returns a list containing the node number that fit the input.
+        Input can be: 
+            A single node index SelectNodes(0)
+            A list of indexes node index SelectNodes([0,1,2])
+            A conditional based on the dimension 1D: SelectNodes("x==0") 2D: SelectNodes("x==0 && y==0")
+        '''
         Outlist = []
 
         # if input is a singe integer, check if there is a node for this integer and return it in a list
@@ -168,12 +174,20 @@ class FEM_Simulation:
 
         # if input is a string, it is supposed to be a conditional
         if isinstance(Input, str):
-            conditional = eval("lambda x: "+Input)
-            for i, x in enumerate(self.XI):
-                if conditional(x):
-                    Outlist.append(i)
+
+            # 1D - condition is x only
+            if (self.NoElementDim==1):
+                conditional = eval("lambda x: "+Input)
+                Outlist = np.arange(self.NoNodes)[[conditional(x) for x in self.XI]]
+            
+            # 2D - condition is x and y
+            elif (self.NoElementDim==2):
+                conditional = eval("lambda x, y: "+Input)
+                Outlist = np.arange(self.NoNodes)[[conditional(x,y) for x, y in self.XI]]
 
         return Outlist
+
+
 
     def Analysis(self):
         '''Enters into the Analysis phase. At least there must be finite elements and Materials'''

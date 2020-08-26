@@ -9,6 +9,10 @@ import PyFEM.elements.Elmt_BaMo_2D as ELEMENT
 FEM = PyFEM.FEM_Simulation(ELEMENT)
 XI, Elem = PyFEM.msh_conv_quad([0.0, 0.0], [48.0, 44.0], [48.0, 60.0], [0.0, 44.0], [10, 4], type='Q1')
 FEM.Add_Mesh(XI, Elem)
+FEM.Add_Material([2100, 0.3], "All")
+print(FEM.SelectNodes("x==0"))
+#FEM.Add_EBC("x==0", "UX", 0)
+#FEM.Add_EBC("x==0", "UY", 0)
 
 ## # TEST for FiniteElement in coupled problems
 # # for the dynamic terms including inertia and damping 
