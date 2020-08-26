@@ -13,11 +13,13 @@ class FEM_Simulation:
         self.Element = Element
 
         # get initialize data from the element
+        self.NoElementDim, \
         self.NoElementNodes, \
-            self.ElementDofNames, \
-            self.NoElementHistory, \
-            self.ElementMaterialNames, \
-            self.ElementPostNames = Element.Elmt_Init()
+        self.ElementDofNames, \
+        self.NoElementHistory, \
+        self.ElementMaterialNames, \
+        self.ElementPostNames = Element.Elmt_Init()
+
         self.NoElementMaterial = len(self.ElementMaterialNames)
         self.NoNodeDofs = len(self.ElementDofNames)
 

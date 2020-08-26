@@ -3,12 +3,13 @@ import numpy as np
 
 
 def Elmt_Init():
+    NoElementDim = 1
     NoElementNodes = 2
     NoElementHistory = 12
     ElementDofNames = ["U", "T"]
     ElementMaterialNames = ["E", "A", "nu", "rho", "alpha", "c"]
     ElementPostNames = ["A", "Sig"]
-    return NoElementNodes, ElementDofNames, NoElementHistory, ElementMaterialNames, ElementPostNames
+    return NoElementDim, NoElementNodes, ElementDofNames, NoElementHistory, ElementMaterialNames, ElementPostNames
 
 
 def Newmark_V(U, U_n, V_n, A_n, gamma, beta, dt):
