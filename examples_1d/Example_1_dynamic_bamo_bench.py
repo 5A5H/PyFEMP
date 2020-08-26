@@ -4,12 +4,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-import FEM_1D
-import FEM_1D.elements.Elmt_BaMo_BaEn_Coupled_1D as ELEMENT
+import PyFEM
+import PyFEM.elements.Elmt_BaMo_BaEn_Coupled_1D as ELEMENT
 
 
 # Create FEM Instance
-FEM = FEM_1D.FEM_Simulation(ELEMENT)
+FEM = PyFEM.FEM_Simulation(ELEMENT)
 FEM.Add_Mesh(9.0,1)
 FEM.Add_Material([5,1.2,10,1,0,0],"All")
 FEM.Add_EBC("x==0","U",0)

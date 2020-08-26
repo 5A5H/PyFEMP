@@ -3,8 +3,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-import FEM_1D
-import FEM_1D.elements.Elmt_BaMo_BaEn_Coupled_1D as ELEMENT
+import PyFEM
+import PyFEM.elements.Elmt_BaMo_BaEn_Coupled_1D as ELEMENT
 
 ## # TEST for FiniteElement in coupled problems
 # # for the dynamic terms including inertia and damping 
