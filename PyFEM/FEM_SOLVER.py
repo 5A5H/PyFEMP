@@ -47,27 +47,27 @@ class FEM_Simulation:
         print("FEM Solver Instance Created")
 
 
-    def Add_1DMesh(self, DomainLength, NumberOfElements):
-        '''Sets a linear space of finite elements'''
+    # def Add_1DMesh(self, DomainLength, NumberOfElements):
+    #     '''Sets a linear space of finite elements'''
 
-        if self.state != 0:
-            self.state_report()
-            return
+    #     if self.state != 0:
+    #         self.state_report()
+    #         return
 
-        self.NoElements = NumberOfElements
-        self.GlobalDomainLength = DomainLength
-        self.NoNodes = self.NoElements + 1
-        self.NoDofs = self.NoNodes * self.NoNodeDofs
+    #     self.NoElements = NumberOfElements
+    #     self.GlobalDomainLength = DomainLength
+    #     self.NoNodes = self.NoElements + 1
+    #     self.NoDofs = self.NoNodes * self.NoNodeDofs
 
-        self.XI = np.linspace(0.0, self.GlobalDomainLength,
-                              num=self.NoElements + 1)
-        self.DI = np.zeros(self.NoDofs)
-        self.h_n = np.zeros(self.NoElements * self.NoElementHistory)
-        self.h_t = np.zeros(self.NoElements * self.NoElementHistory)
+    #     self.XI = np.linspace(0.0, self.GlobalDomainLength,
+    #                           num=self.NoElements + 1)
+    #     self.DI = np.zeros(self.NoDofs)
+    #     self.h_n = np.zeros(self.NoElements * self.NoElementHistory)
+    #     self.h_t = np.zeros(self.NoElements * self.NoElementHistory)
 
-        if (self.verbose):
-            print(' Finite Elemenmts Created')
-        self.state = 1
+    #     if (self.verbose):
+    #         print(' Finite Elemenmts Created')
+    #     self.state = 1
 
     def Add_Mesh(self, NodesList, ElementConnectivity, verbose=False):
         ''' 

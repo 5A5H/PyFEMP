@@ -9,7 +9,7 @@ def msh_rec(X0, X1, N, type='Q1'):
     X0           -> 2D coordinates of lower left corner
     X1           -> 2D coordinates of upper right corner
     N            -> regular mesh divisioning [nx, ny]
-    dtype = 'Q1' -> specify mesh topology
+    type = 'Q1' -> specify mesh topology
 
     Output:
     XI           -> np.array with the nodal coordinates [...,[x,y],...]
@@ -67,7 +67,7 @@ def msh_conv_quad(X1, X2, X3, X4, N, type='Q1'):
     X2           -> 2D coordinates of upper right corner
     X3           -> 2D coordinates of upper left corner
     N            -> regular mesh divisioning [nx, ny]
-    dtype = 'Q1' -> specify mesh topology
+    type = 'Q1' -> specify mesh topology
 
     Output:
     XI           -> np.array with the nodal coordinates [...,[x,y],...]
