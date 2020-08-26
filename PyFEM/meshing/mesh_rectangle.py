@@ -52,18 +52,6 @@ def msh_rec(X0, X1, N, type='Q1'):
 
     return XI, ELEM
 
-# Test
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-
-XI, ELEM = msh_rec([0.0, 0.0], [10.0, 5.0], [10, 5], type='T1')
-
-fig, ax = plt.subplots(1, 1, figsize = (10, 5))
-ax.scatter(XI[:,0], XI[:,1])
-for element in ELEM:
-    ax.add_patch(mpl.patches.Polygon(XI[element], True, fc=(0.0, 0.0, 0.0, 0.0), ec='black'))
-plt.show()
-
 
 
 def msh_conv_quad(X1, X2, X3, X4, N, type='Q1'):
@@ -100,14 +88,31 @@ def msh_conv_quad(X1, X2, X3, X4, N, type='Q1'):
 
     return XI, ELEM
 
-# Test
-import matplotlib as mpl
-import matplotlib.pyplot as plt
 
-XI, ELEM = msh_conv_quad([0.0, 0.0], [48.0, 44.0], [48.0, 60.0], [0.0, 44.0], [10, 4], type='T1')
 
-fig, ax = plt.subplots(1, 1, figsize = (10, 5))
-ax.scatter(XI[:,0], XI[:,1])
-for element in ELEM:
-    ax.add_patch(mpl.patches.Polygon(XI[element], True, fc=(0.0, 0.0, 0.0, 0.0), ec='black'))
-plt.show()
+
+
+# Test:
+if __name__ == "__main__":
+
+    import matplotlib as mpl
+    import matplotlib.pyplot as plt
+
+    XI, ELEM = msh_conv_quad([0.0, 0.0], [48.0, 44.0], [48.0, 60.0], [0.0, 44.0], [10, 4], type='T1')
+
+    fig, ax = plt.subplots(1, 1, figsize = (10, 5))
+    ax.scatter(XI[:,0], XI[:,1])
+    for element in ELEM:
+        ax.add_patch(mpl.patches.Polygon(XI[element], True, fc=(0.0, 0.0, 0.0, 0.0), ec='black'))
+    plt.show()
+
+    import matplotlib as mpl
+    import matplotlib.pyplot as plt
+
+    XI, ELEM = msh_rec([0.0, 0.0], [10.0, 5.0], [10, 5], type='T1')
+
+    fig, ax = plt.subplots(1, 1, figsize = (10, 5))
+    ax.scatter(XI[:,0], XI[:,1])
+    for element in ELEM:
+        ax.add_patch(mpl.patches.Polygon(XI[element], True, fc=(0.0, 0.0, 0.0, 0.0), ec='black'))
+    plt.show()

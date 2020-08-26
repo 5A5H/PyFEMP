@@ -10,7 +10,7 @@ import PyFEM.elements.Elmt_BaMo_BaEn_Coupled_1D as ELEMENT
 
 # Create FEM Instance
 FEM = PyFEM.FEM_Simulation(ELEMENT)
-FEM.Add_Mesh(10.0,20)
+FEM.Add_1DMesh(10.0,20)
 FEM.Add_Material([5,1.2,0,0,1,0],"All")
 FEM.Add_EBC("x==0","U",0)
 FEM.Add_EBC("x==10","T",0)

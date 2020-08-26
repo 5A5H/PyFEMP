@@ -46,7 +46,8 @@ class FEM_Simulation:
         # make some noise
         print("FEM Solver Instance Created")
 
-    def Add_Mesh(self, DomainLength, NumberOfElements):
+
+    def Add_1DMesh(self, DomainLength, NumberOfElements):
         '''Sets a linear space of finite elements'''
 
         if self.state != 0:
@@ -67,6 +68,27 @@ class FEM_Simulation:
         if (self.verbose):
             print(' Finite Elemenmts Created')
         self.state = 1
+
+    def Add_Mesh(self, NodesList, ElementConnectivity, verbose=False):
+        ''' 
+        Add_Mesh(self, NodesList, ElementConnectivity, verbose=False) -> void
+        Sets a mesh based on a list of nodes and matrix of element connectivity.
+
+        Input :
+        NodeList            -> List of nodal coordinates [... , [x,y], ...]
+        ElementConnectivity -> Matrix of nodal indexes per element [... , [n1, n2, n3], ...]
+        '''
+        # check input
+        no_mesh_no, mesh_dim = NodesList.shape
+        no_mesh_el, mesh_no_el = ElementConnectivity.shape
+        if (verbose): print('Mesh NoNodes          : ',no_mesh_no)
+        if (verbose): print('Mesh Dimension        : ',mesh_dim)
+        if (verbose): print('Mesh NoElements       : ',no_mesh_el)
+        if (verbose): print('Mesh Nodes per Element: ',mesh_no_el)
+
+        if (self.NoElementDim != mesh_dim): raise NameError('Mesh dimension is not the same as elements.')
+        if (self.NoElementNodes != mesh_no_el): raise NameError('Mesh is not compatible to element topology.')
+
 
     def Add_Material(self, MaterialList, Option=None):
         '''Adds Material parameters as a list [....] for the next element without already specified material. With Option=All, all elements are set with the given list of parameters.'''
