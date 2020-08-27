@@ -1,4 +1,3 @@
-#from numpy import *
 import numpy as np
 
 
@@ -11,15 +10,153 @@ def Elmt_Init():
     ElementPostNames = ["Sig"]
     return NoElementDim, NoElementNodes, ElementDofNames, NoElementHistory, ElementMaterialNames, ElementPostNames
 
+def SH0_Q1(xi, eta):
+    '''
+    SH0_Q1(xi, eta) -> SH0
+    Return a two dimensional array containing shape functions and derivatives for Q1 element.
+    Usage: SH0( NodeNumber, SHPIndex)  
+    with SHPIndex = {
+        0 -> shape function, 
+        1 -> derived shape function w.r.t. xi, 
+        2 -> derived shape function w.r.t. eta
+        } 
+    '''
+    return 1/4 * np.array([
+            [(1.0-xi)*(1.0-eta), -(1.0-eta),  -(1.0-xi)],
+            [(1.0+xi)*(1.0-eta),  (1.0-eta),  -(1.0+xi)],
+            [(1.0+xi)*(1.0+eta),  (1.0+eta),   (1.0+xi)],
+            [(1.0-xi)*(1.0+eta), -(1.0+eta),   (1.0-xi)]
+        ], dtype=np.float64)
 
-def Elmt_KS(XI, UI, Hn, Ht, Mat, dt):
+def BmatVoigt2D(SHP):
+    '''
+    BmatVoigt(SHP) -> Bmat
+    Returns a B-Matrix (as dim:3) for computing the strain vector in voigt notation.
+    This B-Matrix assumes a 2D plane strain approximation.
+    The is a shape function matrix with derived functions w.r.t. physical space.
+    Input:
+        SHP( NodeNumber, SHPIndex)  
+        with SHPIndex = {
+            0 -> shape function, 
+            1 -> derived shape function w.r.t. x, 
+            2 -> derived shape function w.r.t. y
+            } 
+    Output:
+        Bmat(NodeNumber, i, j)
+        for eps_i = B_Iij * u_Ij
+        with 
+        eps_i = [eps_11, eps_22, eps_33, 2*eps_12, 2*eps_23, 2*eps_13]
+        u_Ij  = [[u_11, u_12] ... [u_n1, u_n2]]
+    '''
+    return np.array([ 
+        [
+            [N[1], 0   ],
+            [0   , N[2]],
+            [0   , 0   ],
+            [N[2], N[1]],
+            [0   , 0   ],
+            [0   , 0   ]
+        ]
+        for N in SHP 
+     ], dtype=np.float64)
+
+def HookeMatVoigt(lam, mue):
+    '''
+    HookeMatVoigt(lam, mue) -> Cmat
+    Returns the constitutive Voigt MATRIX(6,6) for a Hooke material law.
+    The input are the elastic Lame constants.
+    sig_i = Cmat_ij * eps_j
+    with
+    sig_i = [sig_11, sig_22, sig_33, sig_12, sig_23, sig_13]
+    eps_i = [eps_11, eps_22, eps_33, 2*eps_12, 2*eps_23, 2*eps_13]
+    '''
+    return np.array([
+        [lam + 2* mue, lam         , lam         , 0  , 0  , 0  ],
+        [lam         , lam + 2* mue, lam         ,0   , 0  , 0  ],
+        [lam         , lam         , lam + 2* mue, 0  , 0  , 0  ],
+        [0           , 0           , 0           , mue, 0  , 0  ],
+        [0           , 0           , 0           , 0  , mue, 0  ],
+        [0           , 0           , 0           , 0  , 0  , mue]
+    ], dtype=np.float64)        
+    
+
+def Elmt_KS(XL, UL, Hn, Ht, Mat, dt):
     '''
     '''
     verbose = False  # True;
-    # element vector /matrix
+    if verbose: print('XI :',XL)
+    if verbose: print('UI :',UL)
+    if verbose: print('Hn :',Hn)
+    if verbose: print('Ht :',Ht)
+    if verbose: print('b  :',Mat)
+    if verbose: print('dt :',dt)
+    
+    # initialize element vector /matrix
     r_e = np.zeros(4*2)
     k_e = np.zeros((4*2, 4*2))
-    # nodal coordinates
+
+    # geometry and dofs
+    XI = XL.reshape(-1,2)
+    uI = UL.reshape(-1,2)
+    
+
+    # Material Parameters
+    Emod, nu = Mat[0], Mat[1]
+    lam , mue = (Emod*nu)/((1.0+nu)*(1.0-2.0*nu)), Emod/(2.0*(1.0+nu))
+
+    # constitutive matrix (hooke)
+    Cmat = HookeMatVoigt(lam, mue)
+
+    # Provide integration points
+    a = 1/np.sqrt(3)
+    EGP = np.array([[-a,-a,1],[a,-a,1],[a,a,1],[-a,a,1]])
+    NoInt = len(EGP)
+
+    # Start integration Loop
+    for GP in range(NoInt):
+        xi, eta, wgp  = EGP[GP]
+
+        # compute current shape functions
+        SH0 = SH0_Q1(xi, eta)
+
+        # compute mapping
+        Jed = np.einsum('Ii,Ij->ij', XI ,SH0[:,1:3])
+        detJ = np.linalg.det(Jed)
+        if (detJ <= 0): raise NameError("Error unphysical mapping detected.")
+        Jed_inv = np.linalg.inv(Jed)
+        
+        # map shape function derivative
+        SHP = np.copy(SH0)
+        SHP[:,1:3] = np.einsum('Ij,ji->Ii', SH0[:,1:3], Jed_inv)
+        Bmat = BmatVoigt2D(SHP)
+
+        # compute strains / stresses
+        eps = np.einsum('Iij,Ij->i', Bmat, uI)
+        sig = np.einsum('ij,j->i'  , Cmat, eps)
+
+        # export right hand side | this element has 4 nodes with 2 dofs each
+        for I in range(4):
+            
+            # compute nodal right hand side
+            nodal_rhs_vec    = np.einsum('i,ij->j',sig, Bmat[I])
+
+            # integrate nodal right hand side and export
+            r_e[I*2+0] += nodal_rhs_vec[0] * wgp * detJ
+            r_e[I*2+1] += nodal_rhs_vec[1] * wgp * detJ
+
+            for J in range(4):
+
+                # compute nodal stiffness matrix
+                nodal_stiffness = np.einsum('ki,ko,oj->ij', Bmat[I], Cmat, Bmat[I])
+                k_e[I*2+0, J*2+0] += nodal_stiffness[0,0] * wgp * detJ
+                k_e[I*2+0, J*2+1] += nodal_stiffness[0,1] * wgp * detJ
+                k_e[I*2+1, J*2+0] += nodal_stiffness[1,0] * wgp * detJ
+                k_e[I*2+1, J*2+1] += nodal_stiffness[1,1] * wgp * detJ
+
+
+
+
+
    
     return r_e, k_e
 

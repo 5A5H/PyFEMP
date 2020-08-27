@@ -7,3 +7,7 @@ Although the program is very simple, it allows for multiple nodal degrees of fre
 and time dependent analysis.
 
 The program relies on a single class definition which represents a simulation, acompanied with an exchangeable finite element file.
+
+# Solve a time step
+
+* Next Step

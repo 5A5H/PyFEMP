@@ -29,21 +29,33 @@ class FEM_Simulation:
         self.state = 0
 
         # general discretization variables
-        self.time = 0.0
-        self.dt = 1.0
-        self.step = 1
-        self.NoElements = 0
-        self.NoNodes = 0
-        self.NoDofs = 0
-        self.XI = 0
-        self.ELEM = 0
+        self.time = 0.0                     # current time
+        self.dt = 1.0                       # time increment gone frome last time
+        self.step = 0                       # current step
+        self.lambda_load = 0                # global load multiplier
+        self.NoElements = 0                 # number of elements
+        self.NoNodes = 0                    # number of nodes
+        self.NoDofs = 0                     # number of degrees of freedom
+        self.XI = 0                         # nodal coordinates
+        self.ELEM = 0                       # element connectivity
+        self.h_n = 0                        # previous history field
+        self.h_t = 0                        # current history field
 
         # initialize fields for boundary conditions
-        self.NBC = []
-        self.EBC = []
+        self.NBC = []                       # python list to collect natural boundary conditions before analysis
+        self.NBC_Indexes = 0                # vector of indexes to the external load vector where a nbc is present
+        self.NBC_Values = 0                 # vector of values to be placed in the external load vector for each nbc index
+        self.EBC = []                       # python list to collect essential boundary conditions before analysis
+        self.EBC_Indexes = 0                # vector of indexes of constrained degrees of freedom
+        self.EBC_Values = 0                 # vector of values for each constrained degree of freedom
 
-        # prepare list of material parameter
-        self.ElementMaterial = []
+        # element discretization parameter
+        self.ElementMaterial = []           # list of material parameter
+        self.h_n = 0                        # vector of element history field of t=t   (previous)
+        self.h_t = 0                        # vector of element history field of t=t+1 (current)
+        self.DI = 0                         # vector of degrees of freedom
+        self.R_ext = 0                      # vector of external forces
+        
 
         # make some noise
         print("FEM Solver Instance Created")
@@ -128,6 +140,8 @@ class FEM_Simulation:
         for node in NodeList:
             self.NBC.append([node, AffectedDof, Value])
 
+
+
     def SelectDof(self, Input):
         '''Returns a single integer for the dof'''
         if isinstance(Input, int):
@@ -137,6 +151,7 @@ class FEM_Simulation:
                 if dofname == Input:
                     return i
         return 100
+
 
 
     def SelectNodes(self, Input):
@@ -195,13 +210,25 @@ class FEM_Simulation:
             self.state_report()
             return
         elif self.NoElements < 1:
-            print('Error: No Elements! Use AddMesh')
-            return
+            raise NameError('Error! No Elements! Use AddMesh.')
         elif len(self.ElementMaterial) != self.NoElements:
-            print('Error: Not sufficent Material provided! Use AddMaterial')
-            return
-        self.h_t = np.zeros(self.NoElements * self.NoElementHistory)
+            raise NameError('Error! Not sufficent Material provided! Use AddMaterial.')
+        
+        # initialize history
         self.h_n = np.zeros(self.NoElements * self.NoElementHistory)
+        self.h_t = np.copy(self.h_n)
+
+        # initialize degrees of freedom
+        self.DI = np.zeros(self.NoNodes * self.NoNodeDofs)
+
+        # initialize external right hand side
+        self.R_ext = np.zeros(self.NoNodes * self.NoNodeDofs)
+
+        # consolidate boundary conditions
+        self.EBC_Indexes = np.array([ node*2+dof for node, dof, value in self.EBC], dtype=np.uint)
+        self.EBC_Values  = np.array([ value for node, dof, value in self.EBC], dtype=np.float64)
+        self.NBC_Indexes = np.array([ node*2+dof for node, dof, value in self.NBC], dtype=np.uint)
+        self.NBC_Values  = np.array([ value for node, dof, value in self.NBC], dtype=np.float64)
 
         print('Entering Analysis phase')
         if (self.verbose_system):
@@ -221,6 +248,8 @@ class FEM_Simulation:
 
         self.state = 100
 
+
+
     def state_report(self):
         '''Gives hints to the user what to do next, based on a standard procedure.'''
         if self.state == 0:
@@ -228,7 +257,11 @@ class FEM_Simulation:
         elif self.state == 1:
             print('state is 1')
 
+
+
     def NextStep(self, time=1, lambda_load=1):
+
+        # check requirements
         if self.state < 100:
             print('Error: Simulation has not entered analysis phase via Analysis().')
         if (self.verbose_system):
@@ -238,30 +271,36 @@ class FEM_Simulation:
             print(
                 'Error: Time given in NextStep is smaller than internal time: %f5.2' % time)
             return
+        
+        # time shift time dependent variables
         self.time = time
         self.step += 1
-        self.h_n = self.h_t
+        self.h_n = np.copy(self.h_t)
         self.h_t = np.zeros(self.NoElements * self.NoElementHistory)
         self.lambda_load = lambda_load
+
         # apply EBC to DI
-        for i in range(len(self.EBC)):
-            ebc_dof_index = (self.EBC[i][0] * self.NoNodeDofs) + self.EBC[i][1]
-            self.DI[ebc_dof_index] = self.lambda_load * self.EBC[i][2]
+        self.DI[self.EBC_Indexes] = self.lambda_load * self.EBC_Values
+
+        # apply NBC to 
+        self.R_ext[self.NBC_Indexes] = self.lambda_load * self.NBC_Values
+
         return
+
+
+
 
     def CallElement(self, i):
         if i > self.NoElements:
             print('Error: Input exceeds number of elements. max is : %i8' %
                   self.NoElements)
-        elmt_node_start = i * (self.NoElementNodes - 1)
-        elmt_dof_start = i * (self.NoElementNodes - 1) * self.NoNodeDofs
-        elmt_hist_start = i * (self.NoElementNodes - 1) * self.NoElementHistory
+        elmt_nodes        = self.ELEM[i]
+        elmt_dof_indexes  = np.array([i + d for i in elmt_nodes for d in range(self.NoNodeDofs)], dtype=np.uint)
+        elmt_hist_indexes = np.arange(i * self.NoElementHistory,(i+1) * self.NoElementHistory)
 
-        Elmt_XI = self.XI[elmt_node_start:elmt_node_start+self.NoElementNodes]
-        Elmt_UI = self.DI[elmt_dof_start:elmt_dof_start +
-                          self.NoElementNodes*self.NoNodeDofs]
-        Elmt_Hn = self.h_n[elmt_hist_start:elmt_hist_start +
-                           self.NoElementHistory]
+        Elmt_XI = (self.XI[elmt_nodes]).flatten()
+        Elmt_UI = self.DI[elmt_dof_indexes]
+        Elmt_Hn = self.h_n[elmt_hist_indexes]
         Elmt_Ht = np.zeros(self.NoElementHistory)
         Elmt_Mat = self.ElementMaterial[i]
         if (self.verbose):
@@ -280,27 +319,32 @@ class FEM_Simulation:
             Elmt_Mat,
             self.dt
         )
-        self.h_t[elmt_hist_start:elmt_hist_start +
-                 self.NoElementHistory] = Elmt_Ht
+        self.h_t[elmt_hist_indexes] = Elmt_Ht
         if (self.verbose):
             print('Element Vector :', r_e)
             print('Element Matrix :')
             print(K_e)
         return r_e, K_e
 
+
+
     def Assemble(self):
         r = np.zeros(self.NoDofs)
         K = np.zeros((self.NoDofs, self.NoDofs))
         for e in range(self.NoElements):
-            elmt_node_start = e * (self.NoElementNodes - 1)
-            elmt_dof_start = e * (self.NoElementNodes - 1) * self.NoNodeDofs
             r_e, K_e = self.CallElement(e)
 
            # Assemble global vector and global matrix
-            for i in range(self.NoElementNodes * self.NoNodeDofs):
-                r[elmt_dof_start + i] += r_e[i]
-                for j in range(self.NoElementNodes * self.NoNodeDofs):
-                    K[elmt_dof_start + i, elmt_dof_start + j] += K_e[i][j]
+            # compute dof indexes
+            dof_indexes = np.array([ n*self.NoNodeDofs + d for n in self.ELEM[e] for d in range(self.NoNodeDofs)] ,dtype=np.uint)
+
+            # assemble right hand side
+            r[dof_indexes] = r[dof_indexes] + r_e
+
+            # assemble stiffnes matrix
+            for n, i in enumerate(dof_indexes):
+                for m, j in enumerate(dof_indexes):
+                    K[i][j] += K_e[n][m]
 
         if (self.verbose):
             print('Global Vector :', r)
@@ -308,23 +352,12 @@ class FEM_Simulation:
             print(K)
         return r, K
 
+
+
     def FormLinearSystem(self):
         r, K = self.Assemble()
-        # Apply Natural Boundary Conditions
-        r_NBC = np.zeros(self.NoDofs)
-        for i in range(len(self.NBC)):
-            nbc_dof_index = (self.NBC[i][0] * self.NoNodeDofs) + self.NBC[i][1]
-            r_NBC[nbc_dof_index] -= self.lambda_load * self.NBC[i][2]
-            if (self.verbose):
-                print('Global Vector of NBCs :', r_NBC)
-
         # Apply Essential Boundary Conditions / Build reduction operator
-        #    Build vector of Dof-Indexes to delete
-        ebc_dof_indexes = []
-        for i in range(len(self.EBC)):
-            ebc_dof_index = (self.EBC[i][0] * self.NoNodeDofs) + self.EBC[i][1]
-            ebc_dof_indexes.append(ebc_dof_index)
-            self.DI[ebc_dof_index] = self.lambda_load * self.EBC[i][2]
+        ebc_dof_indexes = self.EBC_Indexes
 
         #    Build reduction operator
         I_full = np.diag(np.ones(self.NoDofs))
@@ -332,7 +365,7 @@ class FEM_Simulation:
 
         # Build reduced System of equations
         #    Sum up force vectors
-        RHS = r + r_NBC
+        RHS = r + self.R_ext
 
         # Reduce the System
         RHS = I_red.dot(RHS)
