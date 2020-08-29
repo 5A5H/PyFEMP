@@ -221,10 +221,10 @@ def Elmt_Post(XI, UI, Hn, Ht, Mat, dt, PostName):
     Grad_T = B[0] * T1 + B[1] * T2
     q = - alpha * Grad_T
     if PostName == "Sig":
-        return X1, X2, Sig, Sig
+        return np.array([Sig, Sig])
     if PostName == "A":
-        return X1, X2, A1, A2
+        return np.array([A1, A2])
     if PostName == "q":
-        return X1, X2, q, q
+        return np.array([q, q])
 
-    return X1, X2, 0, 0
+    return np.array([0.0, 0.0])

@@ -469,6 +469,7 @@ class FEM_Simulation:
         return elmt_nodes, r_post_e
 
 
+
     def Assemble_Post(self, PostName):
         post_vector = np.zeros(self.NoNodes)
 
@@ -484,16 +485,23 @@ class FEM_Simulation:
         return post_vector
 
 
+
     def PostProcessing(self, PostName):
-        XI = np.zeros(self.NoElementNodes*self.NoElements)
-        PI = np.zeros(self.NoElementNodes*self.NoElements)
-        for e in range(self.NoElements):
-            X1, X2, P1, P2 = self.CallElementPost(e, PostName)
-            XI[e*2+0] = X1
-            XI[e*2+1] = X2
-            PI[e*2+0] = P1
-            PI[e*2+1] = P2
-        return XI, PI
+        '''
+        Returns a list of nodes and a list of 
+        one requested scalar for each of these nodes.
+        The requested scalar is computed from the element 
+        subroutine "Elmt_Post".
+        '''
+        if PostName not in self.ElementPostNames: 
+            print('Warning, PostName not available.')
+            print('Choose from: ') 
+            print( [str(name)+", " for name in self.ElementPostNames])
+            return
+        post_vector = self.Assemble_Post(PostName)
+        return self.XI.copy(), post_vector
+
+
 
     def ShowMesh(self, ax, deformedmesh = False, PostName = "", **kwargs):
         '''
