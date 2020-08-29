@@ -26,11 +26,10 @@ ux = FEM.NodalDof("x==48 and y==60","UX")
 uy = FEM.NodalDof("x==48 and y==60","UY")
 print('ux :',ux, 'uy :',uy)
 
-fig, ax = plt.subplots(1,1, figsize=(6.0, 6.0))
-#FEM.ShowMesh(ax)
+fig, ax = plt.subplots(1,1, figsize=(8.0, 8.0))
 postplot = FEM.ShowMesh(ax, deformedmesh=True, PostName="SigMises")
-fig.colorbar(postplot)
-
+cbar = fig.colorbar(postplot)
+cbar.ax.set_ylabel('von Mises stress $\sigma_{VM}$')
 plt.show()
 
 

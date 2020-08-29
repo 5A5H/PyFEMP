@@ -1,6 +1,6 @@
 # Class version of 1D Solver
 import numpy as np
-import matplotlib.pyplot as plt
+import matplotlib as mpl
 import warnings
 
 
@@ -505,7 +505,12 @@ class FEM_Simulation:
                 if self.verbose: print('Visualisation 2D Q1')
                 XI = np.copy(self.XI)
                 
+                # some customization on optional arguments
                 if 'ec' not in kwargs.keys(): kwargs['ec']=(0.2, 0.2, 0.2, 1.0)
+                if 'label' in kwargs.keys():
+                    ax.scatter([],[],label=kwargs['label'], ec=kwargs['ec'], fc=kwargs['ec'])
+                    del kwargs['label']
+
 
                 if deformedmesh:
                     Ux = self.DI[::self.NoNodeDofs]
