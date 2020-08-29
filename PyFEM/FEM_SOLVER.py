@@ -1,6 +1,7 @@
 # Class version of 1D Solver
 import numpy as np
 import matplotlib.pyplot as plt
+import warnings
 
 
 class FEM_Simulation:
@@ -48,6 +49,7 @@ class FEM_Simulation:
         self.EBC = []                       # python list to collect essential boundary conditions before analysis
         self.EBC_Indexes = 0                # vector of indexes of constrained degrees of freedom
         self.EBC_Values = 0                 # vector of values for each constrained degree of freedom
+        self.NoEquations = 0                # number of all unconstrained dofs
 
         # element discretization parameter
         self.ElementMaterial = []           # list of material parameter
@@ -229,6 +231,7 @@ class FEM_Simulation:
         self.EBC_Values  = np.array([ value for node, dof, value in self.EBC], dtype=np.float64)
         self.NBC_Indexes = np.array([ node*2+dof for node, dof, value in self.NBC], dtype=np.uint)
         self.NBC_Values  = np.array([ value for node, dof, value in self.NBC], dtype=np.float64)
+        self.NoEquations = self.NoNodes * self.NoNodeDofs - len(self.NBC_Indexes)
 
         print('Entering Analysis phase')
         if (self.verbose_system):
@@ -295,7 +298,7 @@ class FEM_Simulation:
             print('Error: Input exceeds number of elements. max is : %i8' %
                   self.NoElements)
         elmt_nodes        = self.ELEM[i]
-        elmt_dof_indexes  = np.array([i + d for i in elmt_nodes for d in range(self.NoNodeDofs)], dtype=np.uint)
+        elmt_dof_indexes  = np.array([i * self.NoNodeDofs + d for i in elmt_nodes for d in range(self.NoNodeDofs)], dtype=np.uint)
         elmt_hist_indexes = np.arange(i * self.NoElementHistory,(i+1) * self.NoElementHistory)
 
         Elmt_XI = (self.XI[elmt_nodes]).flatten()
@@ -365,7 +368,7 @@ class FEM_Simulation:
 
         # Build reduced System of equations
         #    Sum up force vectors
-        RHS = r + self.R_ext
+        RHS = r - self.R_ext
 
         # Reduce the System
         RHS = I_red.dot(RHS)
@@ -425,23 +428,24 @@ class FEM_Simulation:
             dof_index = (node * self.NoNodeDofs) + AffectedDof
             return self.DI[dof_index]
 
+
+
     def CallElementPost(self, i, PostName):
         if i > self.NoElements:
             print('Error: Input exceeds number of elements. max is : %i8' %
                   self.NoElements)
-        elmt_node_start = i * (self.NoElementNodes - 1)
-        elmt_dof_start = i * (self.NoElementNodes - 1) * self.NoNodeDofs
-        elmt_hist_start = i * (self.NoElementNodes - 1) * self.NoElementHistory
+        elmt_nodes        = self.ELEM[i]
+        elmt_dof_indexes  = np.array([i * self.NoNodeDofs + d for i in elmt_nodes for d in range(self.NoNodeDofs)], dtype=np.uint)
+        elmt_hist_indexes = np.arange(i * self.NoElementHistory,(i+1) * self.NoElementHistory)
 
-        Elmt_XI = self.XI[elmt_node_start:elmt_node_start+self.NoElementNodes]
-        Elmt_UI = self.DI[elmt_dof_start:elmt_dof_start +
-                          self.NoElementNodes*self.NoNodeDofs]
-        Elmt_Hn = self.h_n[elmt_hist_start:elmt_hist_start +
-                           self.NoElementHistory]
+        Elmt_XI = (self.XI[elmt_nodes]).flatten()
+        Elmt_UI = self.DI[elmt_dof_indexes]
+        Elmt_Hn = self.h_n[elmt_hist_indexes]
         Elmt_Ht = np.zeros(self.NoElementHistory)
         Elmt_Mat = self.ElementMaterial[i]
+
         # call element routine to get element vector / element matrix
-        X1, X2, P1, P2 = self.Element.Elmt_Post(
+        r_post_e= self.Element.Elmt_Post(
             Elmt_XI,
             Elmt_UI,
             Elmt_Hn,
@@ -450,7 +454,23 @@ class FEM_Simulation:
             self.dt,
             PostName
         )
-        return X1, X2, P1, P2
+        return elmt_nodes, r_post_e
+
+
+    def Assemble_Post(self, PostName):
+        post_vector = np.zeros(self.NoNodes)
+
+        for e in range(self.NoElements):
+            elmt_nodes, r_post_e = self.CallElementPost(e, PostName)
+            
+            # post weights
+            post_weights = 1/np.array([np.count_nonzero(self.ELEM== i) for i in elmt_nodes])
+
+            # assemble post vector
+            post_vector[elmt_nodes] = post_vector[elmt_nodes] + (r_post_e * post_weights)
+
+        return post_vector
+
 
     def PostProcessing(self, PostName):
         XI = np.zeros(self.NoElementNodes*self.NoElements)
@@ -462,3 +482,65 @@ class FEM_Simulation:
             PI[e*2+0] = P1
             PI[e*2+1] = P2
         return XI, PI
+
+    def ShowMesh(self, ax, deformedmesh = False, PostName = "", **kwargs):
+        '''
+        Visualisation of Mesh and solution.
+
+        '''
+        import matplotlib as mpl
+
+        if (self.NoElementDim==2):
+            # 2D Visualisation
+            
+            if (self.NoElementNodes==4):
+                #  visualisation of Q1
+                if self.verbose: print('Visualisation 2D Q1')
+                XI = np.copy(self.XI)
+                MeshColor = (0.8, 0.8, 0.8, 1.0)
+
+                if deformedmesh:
+                    Ux = self.DI[::self.NoNodeDofs]
+                    Uy = self.DI[1::self.NoNodeDofs]
+                    XI = XI + np.array([Ux, Uy]).T
+                    MeshColor = (0.0, 0.0, 0.0, 1.0)
+
+                for elem in self.ELEM:
+                    ax.add_patch(mpl.patches.Polygon(
+                        XI[elem],
+                        True,
+                        fc=(0.0, 0.0, 0.0, 0.0),
+                        ec=MeshColor
+                        ))
+
+                ax.set_xlim(min(XI[:,0])*1.1, max(XI[:,0])*1.1)
+                ax.set_ylim(min(XI[:,1]*1.1), max(XI[:,1])*1.1)
+                ax.set_aspect('equal')
+
+                if (PostName!=""):
+                    if PostName not in self.ElementPostNames: 
+                        print('Warning, PostName not available.')
+                        print('Choose from: ') 
+                        print( [str(name)+", " for name in self.ElementPostNames])
+                        return
+
+                    # get the post vector
+                    post_vector = self.Assemble_Post(PostName)
+                    
+                    # for Q1 topology we build a triangulation
+                    triangulation_for_Q1 = np.array([[elmt[0], elmt[1], elmt[3], elmt[1], elmt[2], elmt[3]] for elmt in self.ELEM] ,dtype=np.uint)
+                    triangulation_for_Q1 = triangulation_for_Q1.reshape(-1,3)
+                    
+                    # counter plot
+                    warnings.filterwarnings("ignore") # to supress a warning from countour
+                    levels = 5
+                    postplot = ax.tricontourf(XI[:,0], XI[:,1], post_vector, levels, triangles=triangulation_for_Q1, **kwargs)
+                    warnings.filterwarnings("default")
+                    return postplot
+
+            else:
+                raise NameError('Error! No 2D visualisation for :'+str(self.NoElementNodes)+' nodes')
+
+        else: 
+            raise NameError("Error! Visualisation not supported!")
+        return
