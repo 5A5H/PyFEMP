@@ -74,8 +74,13 @@ class FEM_Simulation:
         ElementConnectivity -> Matrix of nodal indexes per element [... , [n1, n2, n3], ...]
         '''
         # check input
-        no_mesh_no, mesh_dim = NodesList.shape
+        if (NodesList.ndim == 1):
+            no_mesh_no, mesh_dim = len(NodesList), 1
+        else:
+            no_mesh_no, mesh_dim = NodesList.shape
+
         no_mesh_el, mesh_no_el = ElementConnectivity.shape
+
         if (verbose): print('Mesh NoNodes          : ',no_mesh_no)
         if (verbose): print('Mesh Dimension        : ',mesh_dim)
         if (verbose): print('Mesh NoElements       : ',no_mesh_el)
@@ -279,7 +284,6 @@ class FEM_Simulation:
         self.time = time
         self.step += 1
         self.h_n = np.copy(self.h_t)
-        self.h_t = np.zeros(self.NoElements * self.NoElementHistory)
         self.lambda_load = lambda_load
 
         # apply EBC to DI
@@ -380,16 +384,20 @@ class FEM_Simulation:
 
         return RHS, LHS, I_red
 
+
+
     def NewtonIteration(self):
         RHS, LHS, I_red = self.FormLinearSystem()
         Residual = np.sqrt(RHS.dot(RHS))
         if (self.verbose_system):
             print('      |R|    : %f10.8' % Residual)
+
         # Solve the linear System
         LHS_inv = np.linalg.inv(LHS)
         dDI = - LHS_inv.dot(RHS)
         if (self.verbose):
             print('Lin EqS Sol :', dDI)
+
         # Compute Norm of Solution Vector
         Norm_dDI = np.sqrt(dDI.dot(dDI))
         if (self.verbose_system):
@@ -401,6 +409,8 @@ class FEM_Simulation:
             print('Current vector of unknowns :', self.DI)
 
         return np.sqrt(Residual*Norm_dDI)
+
+
 
     def Mod_Material(self, MaterialList, Element_I):
         ''' Modifies an already defined Material of element I'''
@@ -416,6 +426,8 @@ class FEM_Simulation:
 
         self.ElementMaterial[Element_I] = MaterialList
         return
+
+
 
     def NodalDof(self, NodeSelector, DofSelector):
         '''Return current DoF by NodeSelector, DofSelector'''
