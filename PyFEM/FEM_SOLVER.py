@@ -486,7 +486,14 @@ class FEM_Simulation:
     def ShowMesh(self, ax, deformedmesh = False, PostName = "", **kwargs):
         '''
         Visualisation of Mesh and solution.
-
+        ShowMesh(self, ax, deformedmesh = False, PostName = "", **kwargs) -> plot
+        The function takes a matplotlit figure axis as arguments and plots inside the same.
+        The option deformedmesh = False can be used to plot the deformed mesh, where
+        nodal displacement is supposed to be the n.th first nodal degrees of freedom
+        in n-dimensions.
+        PostName = "" can be used to create a countour plot of the quantities provided by the
+        element subroutine "Elmt_Post".  **kwargs is passed to the sub-plotting routines
+        (patches.Polygon and tricontourf) to modify eg line colors/witdhs etc.
         '''
         import matplotlib as mpl
 
@@ -497,20 +504,20 @@ class FEM_Simulation:
                 #  visualisation of Q1
                 if self.verbose: print('Visualisation 2D Q1')
                 XI = np.copy(self.XI)
-                MeshColor = (0.8, 0.8, 0.8, 1.0)
+                
+                if 'ec' not in kwargs.keys(): kwargs['ec']=(0.2, 0.2, 0.2, 1.0)
 
                 if deformedmesh:
                     Ux = self.DI[::self.NoNodeDofs]
                     Uy = self.DI[1::self.NoNodeDofs]
                     XI = XI + np.array([Ux, Uy]).T
-                    MeshColor = (0.0, 0.0, 0.0, 1.0)
 
                 for elem in self.ELEM:
                     ax.add_patch(mpl.patches.Polygon(
                         XI[elem],
                         True,
                         fc=(0.0, 0.0, 0.0, 0.0),
-                        ec=MeshColor
+                        **kwargs
                         ))
 
                 ax.set_xlim(min(XI[:,0])*1.1, max(XI[:,0])*1.1)
