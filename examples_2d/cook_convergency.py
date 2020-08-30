@@ -3,15 +3,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-import PyFEM
-import PyFEM.elements.Elmt_BaMo_2D as ELEMENT
+import PyFEMP
+import PyFEMP.elements.Elmt_BaMo_2D as ELEMENT
 
 uu = []
 nn = np.array([1, 2, 4, 6, 8, 10, 15, 20])
 for n in nn:
-    FEM = PyFEM.FEM_Simulation(ELEMENT)
+    FEM = PyFEMP.FEM_Simulation(ELEMENT)
     sig = 100
-    XI, Elem = PyFEM.msh_conv_quad([0.0, 0.0], [48.0, 44.0], [48.0, 60.0], [0.0, 44.0], [2*n, n], type='Q1')
+    XI, Elem = PyFEMP.msh_conv_quad([0.0, 0.0], [48.0, 44.0], [48.0, 60.0], [0.0, 44.0], [2*n, n], type='Q1')
     FEM.Add_Mesh(XI, Elem)
     FEM.Add_Material([2100, 0.3], "All")
     FEM.Add_EBC("x==0",  "UX", 0)

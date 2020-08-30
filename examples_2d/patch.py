@@ -3,12 +3,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-import PyFEM
-import PyFEM.elements.Elmt_BaMo_2D as ELEMENT
+import PyFEMP
+import PyFEMP.elements.Elmt_BaMo_2D as ELEMENT
 
-FEM = PyFEM.FEM_Simulation(ELEMENT)
+FEM = PyFEMP.FEM_Simulation(ELEMENT)
 n = 4
-XI, Elem = PyFEM.msh_rec([0.0, 0.0], [10.0, 10.0], [n, n], type='Q1')
+XI, Elem = PyFEMP.msh_rec([0.0, 0.0], [10.0, 10.0], [n, n], type='Q1')
 FEM.Add_Mesh(XI, Elem)
 FEM.Add_Material([2100, 0.3], "All")
 FEM.Add_EBC("x==0",  "UX", 0)

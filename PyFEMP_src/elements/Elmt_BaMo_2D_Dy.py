@@ -72,12 +72,31 @@ def HookeMatVoigt(lam, mue):
     '''
     return np.array([
         [lam + 2* mue, lam         , lam         , 0  , 0  , 0  ],
-        [lam         , lam + 2* mue, lam         ,0   , 0  , 0  ],
+        [lam         , lam + 2* mue, lam         , 0  , 0  , 0  ],
         [lam         , lam         , lam + 2* mue, 0  , 0  , 0  ],
         [0           , 0           , 0           , mue, 0  , 0  ],
         [0           , 0           , 0           , 0  , mue, 0  ],
         [0           , 0           , 0           , 0  , 0  , mue]
-    ], dtype=np.float64)        
+    ], dtype=np.float64)
+
+def DampMatVoigt(damp):
+    '''
+    DampMatVoigt(damp) -> Dmat
+    Returns the constitutive Voigt MATRIX(6,6) for a isotropic damping law.
+    The input is a single damping parameter.
+    sig_i_damp = Dmat_ij * deps_j
+    with
+    sig_i  = [sig_11 , sig_22 , sig_33 , sig_12   , sig_23   , sig_13   ]
+    deps_i = [deps_11, deps_22, deps_33, 2*deps_12, 2*deps_23, 2*deps_13]
+    '''
+    return np.array([
+        [damp  , 0     , 0     , 0     , 0     , 0     ],
+        [0     , damp  , 0     , 0     , 0     , 0     ],
+        [0     , 0     , damp  , 0     , 0     , 0     ],
+        [0     , 0     , 0     , damp/2, 0     , 0     ],
+        [0     , 0     , 0     , 0     , damp/2, 0     ],
+        [0     , 0     , 0     , 0     , 0     , damp/2]
+    ], dtype=np.float64)          
 
 def Newmark_V(U, U_n, V_n, A_n, gamma, beta, dt):
     return gamma/(beta*dt) * (U-U_n) + (1.0-gamma/beta) * V_n + dt * (1.0-gamma/(2.0*beta)) * A_n
@@ -130,12 +149,15 @@ def Elmt_KS(XL, UL, Hn, Ht, Mat, dt):
     # constitutive matrix (hooke)
     Cmat = HookeMatVoigt(lam, mue)
 
-    # Provide integration points
+    # damping matrix (isotropic)
+    Dmat = DampMatVoigt(d)
+
+    # provide integration points
     aa = 1/np.sqrt(3)
     EGP = np.array([[-aa, -aa, 1],[aa, -aa, 1],[aa, aa, 1],[-aa, aa, 1]])
     NoInt = len(EGP)
 
-    # Start integration Loop
+    # start integration Loop
     for GP in range(NoInt):
         if verbose: print('GP: ',GP)
         xi, eta, wgp  = EGP[GP]
@@ -159,12 +181,20 @@ def Elmt_KS(XL, UL, Hn, Ht, Mat, dt):
         eps = np.einsum('Iij,Ij->i', Bmat, uI)
         if verbose: print('eps: ')
         if verbose: print(np.array([eps[0], eps[3]/2, eps[4]/2, eps[3]/2, eps[1], eps[5]/2, eps[4]/2, eps[5]/2, eps[2]]))
-        sig = np.einsum('ij,j->i'  , Cmat, eps)
+
+        deps = np.einsum('Iij,Ij->i', Bmat, vI)
+        if verbose: print('deps: ')
+        if verbose: print(np.array([deps[0], deps[3]/2, deps[4]/2, deps[3]/2, deps[1], deps[5]/2, deps[4]/2, deps[5]/2, deps[2]]))
+        depsdu = Bmat * (gamma/(beta*dt))
+
+        sig = np.einsum('ij,j->i'  , Cmat, eps) \
+            + np.einsum('ij,j->i'  , Dmat, deps)
         if verbose: print('sig: ')
         if verbose: print(np.array([[sig[0], sig[3], sig[4]],[sig[3], sig[1], sig[5]],[sig[4], sig[5], sig[2]]]))
 
         # compute acelleration
         a = np.einsum('I,Ii->i',SHP[:,0], aI)
+        dadu = (1.0/(beta*dt**2)) * np.eye(2)
 
         # export right hand side | this element has 4 nodes with 2 dofs each
         for I in range(4):
@@ -179,7 +209,9 @@ def Elmt_KS(XL, UL, Hn, Ht, Mat, dt):
             for J in range(4):
 
                 # compute nodal stiffness matrix
-                nodal_stiffness = np.einsum('ki,ko,oj->ij', Bmat[I], Cmat, Bmat[J]) + SHP[I,0] * SHP[J,0] * rho * (1.0/(beta*dt**2)) * np.eye(2)
+                nodal_stiffness = np.einsum('ki,ko,oj->ij', Bmat[I], Cmat, Bmat[J]) \
+                                + SHP[I,0] * SHP[J,0] * rho * dadu \
+                                + np.einsum('ki,ko,oj->ij', depsdu[I], Dmat, Bmat[J])
 
                 # integrate nodal stiffness matrix and export
                 k_e[I*2+0, J*2+0] += nodal_stiffness[0,0] * wgp * detJ

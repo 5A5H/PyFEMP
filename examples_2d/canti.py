@@ -3,14 +3,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-import PyFEM
-import PyFEM.elements.Elmt_BaMo_2D_Dy as ELEMENT
+import PyFEMP
+import PyFEMP.elements.Elmt_BaMo_2D_Dy as ELEMENT
 
-FEM = PyFEM.FEM_Simulation(ELEMENT)
-n, sig = 3, 2
-XI, Elem = PyFEM.msh_conv_quad([0.0, 0.0], [10.0, 0.0], [10.0, 1.0], [0.0, 1.0], [10*n, n], type='Q1')
+FEM = PyFEMP.FEM_Simulation(ELEMENT)
+n, sig = 5, 2
+XI, Elem = PyFEMP.msh_conv_quad([0.0, 0.0], [10.0, 0.0], [10.0, 1.0], [0.0, 1.0], [10*n, n], type='Q1')
 FEM.Add_Mesh(XI, Elem)
-FEM.Add_Material([2100, 0.3, 0.1, 0.0], "All")
+FEM.Add_Material([2100, 0.3, 0.1, 12.5], "All")
 FEM.Add_EBC("x==0",  "UX", 0)
 FEM.Add_EBC("x==0",  "UY", 0)
 FEM.Add_NBC("x==10", "UY", sig/n)
@@ -28,7 +28,7 @@ def load(time):
   return lam
 
 # tempral discretization
-nStep, time, dt = 100, 0.0, 0.1
+nStep, time, dt = 50, 0.0, 0.2
 animation = True
 
 # record array

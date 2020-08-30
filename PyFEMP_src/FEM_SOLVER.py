@@ -346,7 +346,7 @@ class FEM_Simulation:
             dof_indexes = np.array([ n*self.NoNodeDofs + d for n in self.ELEM[e] for d in range(self.NoNodeDofs)] ,dtype=np.uint)
 
             # assemble right hand side
-            r[dof_indexes] = r[dof_indexes] + r_e
+            r[dof_indexes] = r[dof_indexes] - r_e
 
             # assemble stiffnes matrix
             for n, i in enumerate(dof_indexes):
@@ -372,7 +372,7 @@ class FEM_Simulation:
 
         # Build reduced System of equations
         #    Sum up force vectors
-        RHS = r - self.R_ext
+        RHS = r + self.R_ext
 
         # Reduce the System
         RHS = I_red.dot(RHS)
@@ -393,8 +393,7 @@ class FEM_Simulation:
             print('      |R|    : %f10.8' % Residual)
 
         # Solve the linear System
-        LHS_inv = np.linalg.inv(LHS)
-        dDI = - LHS_inv.dot(RHS)
+        dDI = np.linalg.solve(LHS, RHS)
         if (self.verbose):
             print('Lin EqS Sol :', dDI)
 
