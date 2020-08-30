@@ -7,7 +7,7 @@ import PyFEMP
 import PyFEMP.elements.Elmt_BaMo_2D_Dy as ELEMENT
 
 FEM = PyFEMP.FEM_Simulation(ELEMENT)
-n, sig = 5, 2
+n, sig = 3, 2
 XI, Elem = PyFEMP.msh_conv_quad([0.0, 0.0], [10.0, 0.0], [10.0, 1.0], [0.0, 1.0], [10*n, n], type='Q1')
 FEM.Add_Mesh(XI, Elem)
 FEM.Add_Material([2100, 0.3, 0.1, 12.5], "All")

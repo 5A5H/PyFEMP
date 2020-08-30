@@ -10,7 +10,8 @@ import PyFEMP.elements.Elmt_BaMo_BaEn_Coupled_1D as ELEMENT
 # Create FEM Instance
 FEM = PyFEMP.FEM_Simulation(ELEMENT)
 FEM.verbose_system = False
-FEM.Add_1DMesh(100.0,100)
+XI, ELEM = PyFEMP.msh_line(0, 100.0, 10)
+FEM.Add_Mesh(XI, ELEM)
 FEM.Add_Material([100,1,1,100,0,0],"All")
 FEM.Mod_Material([0,1,1,100,0,0],60)
 FEM.Add_EBC("x==0","U",0)

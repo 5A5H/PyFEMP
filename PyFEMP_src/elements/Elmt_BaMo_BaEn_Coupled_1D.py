@@ -8,7 +8,7 @@ def Elmt_Init():
     NoElementHistory = 12
     ElementDofNames = ["U", "T"]
     ElementMaterialNames = ["E", "A", "nu", "rho", "alpha", "c"]
-    ElementPostNames = ["A", "Sig"]
+    ElementPostNames = ["A", "Sig", "q"]
     return NoElementDim, NoElementNodes, ElementDofNames, NoElementHistory, ElementMaterialNames, ElementPostNames
 
 
