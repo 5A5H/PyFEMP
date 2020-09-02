@@ -7,16 +7,15 @@ if __name__ == "__main__":
     major, minor, micro, releaselevel, serial = sys.version_info
     
     # find installation directory
-    installdir = sys.prefix+"/lib/python"+str(major)+"."+str(minor)+"/site-packages/"
+    installdir = os.path.join(sys.prefix, "lib", "python"+str(major)+"."+str(minor), "site-packages")
     if os.path.exists(installdir): 
-        installdir += "PyFEMP/"
+        installdir = os.path.join(installdir, "PyFEMP")
     else:
-        installdir = sys.path[5]
+        installdir = os.path.join(sys.path[5], "PyFEMP")
 
     # check if module is here
-    if os.path.exists(os.getcwd()+"/PyFEMP_src/"): 
-        module = os.getcwd()+"/PyFEMP_src/"
-    else:
+    module = os.path.join(os.path.dirname(__file__), "PyFEMP_src")
+    if not os.path.exists(module): 
         raise NameError('\033[91m'+"Error! Redownload and try again!")
 
 
@@ -32,7 +31,7 @@ if __name__ == "__main__":
         raise NameError('\033[91m'+"Error! Install the python package matplotlib first.")
     try:
         import PyFEMP
-        existingPyFEMP = os.path.dirname(PyFEMP.__file__)+"/"
+        existingPyFEMP = os.path.dirname(PyFEMP.__file__)
     except:
         pass
 
