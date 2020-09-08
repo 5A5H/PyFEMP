@@ -11,7 +11,7 @@ if __name__ == "__main__":
     if os.path.exists(installdir): 
         installdir = os.path.join(installdir, "PyFEMP")
     else:
-        installdir = os.path.join(sys.path[5], "PyFEMP")
+        installdir = os.path.join(sys.path[2], "PyFEMP")
 
     # check if module is here
     module = os.path.join(os.path.dirname(__file__), "PyFEMP_src")
