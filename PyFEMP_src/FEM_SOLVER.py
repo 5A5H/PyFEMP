@@ -95,8 +95,8 @@ class FEM_Simulation:
         self.NoDofs = no_mesh_no * self.NoNodeDofs
         if (verbose): print('Mesh Total Dofs       : ',self.NoDofs)
 
-        self.XI = NodesList
-        self.ELEM = ElementConnectivity
+        self.XI   = np.array(NodesList, dtype=np.float64)
+        self.ELEM = np.array(ElementConnectivity, dtype=np.uint)
 
         if (self.verbose): print(' Finite Elemenmt Mesh Read!')
         self.state = 1
@@ -519,7 +519,56 @@ class FEM_Simulation:
         if (self.NoElementDim==2):
             # 2D Visualisation
             
-            if (self.NoElementNodes==4):
+            if (self.NoElementNodes==3):
+                #  visualisation of T1
+                if self.verbose: print('Visualisation 2D T1')
+                XI = np.copy(self.XI)
+                
+                # some customization on optional arguments
+                if 'ec' not in kwargs.keys(): kwargs['ec']=(0.2, 0.2, 0.2, 1.0)
+                if 'label' in kwargs.keys():
+                    ax.scatter([],[],label=kwargs['label'], ec=kwargs['ec'], fc=kwargs['ec'])
+                    del kwargs['label']
+
+                
+                if deformedmesh:
+                    Ux = self.DI[::self.NoNodeDofs]
+                    Uy = self.DI[1::self.NoNodeDofs]
+                    XI = XI + np.array([Ux, Uy]).T
+                
+                for elem in self.ELEM:
+                    ax.add_patch(mpl.patches.Polygon(
+                        XI[elem],
+                        True,
+                        fc=(0.0, 0.0, 0.0, 0.0),
+                        **kwargs
+                        ))
+                
+                ax.set_xlim(min(XI[:,0])*1.1, max(XI[:,0])*1.1)
+                ax.set_ylim(min(XI[:,1]*1.1), max(XI[:,1])*1.1)
+                ax.set_aspect('equal')
+
+                if (PostName!=""):
+                    if PostName not in self.ElementPostNames: 
+                        print('Warning, PostName not available.')
+                        print('Choose from: ') 
+                        print( [str(name)+", " for name in self.ElementPostNames])
+                        return
+
+                    # get the post vector
+                    post_vector = self.Assemble_Post(PostName)
+                    
+                    # counter plot
+                    warnings.filterwarnings("ignore") # to supress a warning from countour
+                    levels = 5
+                    postplot = ax.tricontourf(XI[:,0], XI[:,1], post_vector, levels, triangles=self.ELEM, **kwargs)
+                    warnings.filterwarnings("default")
+                    return postplot
+
+                
+
+            elif (self.NoElementNodes==4):
+                
                 #  visualisation of Q1
                 if self.verbose: print('Visualisation 2D Q1')
                 XI = np.copy(self.XI)
