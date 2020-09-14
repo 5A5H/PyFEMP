@@ -157,6 +157,7 @@ class FEM_Simulation:
             for i, dofname in enumerate(self.ElementDofNames):
                 if dofname == Input:
                     return i
+        raise NameError('Error ! DOF name not supported by element')
         return 100
 
 
@@ -232,9 +233,9 @@ class FEM_Simulation:
         self.R_ext = np.zeros(self.NoNodes * self.NoNodeDofs)
 
         # consolidate boundary conditions
-        self.EBC_Indexes = np.array([ node*2+dof for node, dof, value in self.EBC], dtype=np.uint)
+        self.EBC_Indexes = np.array([ node*self.NoNodeDofs+dof for node, dof, value in self.EBC], dtype=np.uint)
         self.EBC_Values  = np.array([ value for node, dof, value in self.EBC], dtype=np.float64)
-        self.NBC_Indexes = np.array([ node*2+dof for node, dof, value in self.NBC], dtype=np.uint)
+        self.NBC_Indexes = np.array([ node*self.NoNodeDofs+dof for node, dof, value in self.NBC], dtype=np.uint)
         self.NBC_Values  = np.array([ value for node, dof, value in self.NBC], dtype=np.float64)
         self.NoEquations = self.NoNodes * self.NoNodeDofs - len(self.NBC_Indexes)
 
