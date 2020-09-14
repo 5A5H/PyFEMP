@@ -15,7 +15,7 @@ Mesh = [
     ["plate_with_hole_nodes.csv"           , "plate_with_hole_elmts.csv"],
     ["plate_with_hole_nodes_fine.csv"      , "plate_with_hole_elmts_fine.csv"],
     ["plate_with_hole_nodes_super_fine.csv", "plate_with_hole_elmts_super_fine.csv"]
-][2]
+][1]
 
 CSV_NodeFile = os.path.join(PyFEMP.assets, "plate_with_hole", Mesh[0])
 CSV_ElmtFile = os.path.join(PyFEMP.assets, "plate_with_hole", Mesh[1])
@@ -24,8 +24,8 @@ Elem = np.genfromtxt(CSV_ElmtFile, delimiter=',')
 FEM.Add_Mesh(XI, Elem)
 FEM.Add_Material([2100, 0.3], "All")
 FEM.Add_EBC("x==-2",  "UX", 0)
-FEM.Add_EBC("y==-2",  "UY", 0)
 FEM.Add_EBC("x== 2",  "UX", 0.5)
+FEM.Add_EBC("y==-2 and x==-2",  "UY", 0)
 
 
 FEM.Analysis()

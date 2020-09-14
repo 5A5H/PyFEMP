@@ -561,7 +561,7 @@ class FEM_Simulation:
                     # counter plot
                     warnings.filterwarnings("ignore") # to supress a warning from countour
                     levels = 5
-                    postplot = ax.tricontourf(XI[:,0], XI[:,1], post_vector, levels, triangles=self.ELEM, **kwargs)
+                    postplot = ax.tricontourf(XI[:,0], XI[:,1], post_vector, levels, triangles=self.ELEM, **kwargs, cmap='jet')
                     warnings.filterwarnings("default")
                     return postplot
 
