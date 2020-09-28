@@ -123,11 +123,11 @@ class FEM_Simulation:
             self.ElementMaterial = []
             for i in range(self.NoElements):
                 self.ElementMaterial.append(MaterialList)
-            print(' Material set for All Elements')
+            if (self.verbose): print(' Material set for All Elements')
 
         if Option == None:
             self.ElementMaterial.append(MaterialList)
-            print(' Material set for Element %i' % len(self.ElementMaterial))
+            if (self.verbose): print(' Material set for Element %i' % len(self.ElementMaterial))
 
     
     
@@ -304,7 +304,7 @@ class FEM_Simulation:
 
 
 
-    def CallElement(self, i):
+    def CallElement(self, i, verbose=False):
         if i > self.NoElements:
             print('Error: Input exceeds number of elements. max is : %i8' %
                   self.NoElements)
@@ -317,7 +317,7 @@ class FEM_Simulation:
         Elmt_Hn = self.h_n[elmt_hist_indexes]
         Elmt_Ht = np.zeros(self.NoElementHistory)
         Elmt_Mat = self.ElementMaterial[i]
-        if (self.verbose):
+        if (self.verbose or verbose):
             print('Calling  : ', i)
             print('Elmt XI  : ', Elmt_XI)
             print('Elmt UI  : ', Elmt_UI)
@@ -334,7 +334,7 @@ class FEM_Simulation:
             self.dt
         )
         self.h_t[elmt_hist_indexes] = Elmt_Ht
-        if (self.verbose):
+        if (self.verbose or verbose):
             print('Element Vector :', r_e)
             print('Element Matrix :')
             print(K_e)
@@ -342,7 +342,7 @@ class FEM_Simulation:
 
 
 
-    def Assemble(self):
+    def Assemble(self, verbose=False):
         r = np.zeros(self.NoDofs)
         K = np.zeros((self.NoDofs, self.NoDofs))
         for e in range(self.NoElements):
@@ -353,14 +353,14 @@ class FEM_Simulation:
             dof_indexes = np.array([ n*self.NoNodeDofs + d for n in self.ELEM[e] for d in range(self.NoNodeDofs)] ,dtype=np.uint)
 
             # assemble right hand side
-            r[dof_indexes] = r[dof_indexes] - r_e
+            r[dof_indexes] = r[dof_indexes] + r_e
 
             # assemble stiffnes matrix
             for n, i in enumerate(dof_indexes):
                 for m, j in enumerate(dof_indexes):
                     K[i][j] += K_e[n][m]
 
-        if (self.verbose):
+        if (self.verbose or verbose):
             print('Global Vector :', r)
             print('Global Matrix :')
             print(K)
@@ -379,7 +379,7 @@ class FEM_Simulation:
 
         # Build reduced System of equations
         #    Sum up force vectors
-        RHS = r + self.R_ext
+        RHS = self.R_ext - r
 
         # Reduce the System
         RHS = I_red.dot(RHS)
