@@ -50,6 +50,8 @@ Postprocessing fields are introduced by a string name per scalar as well, but we
 
 # The `Elmt_KS(XL, UL, Hn, Ht, Mat, dt)`
 
+## Interface of the `Elmt_KS` routine
+
 This is the main routine of the finite element, called during the solution procedure. The input is standartized as
 
  * `XL = np.array([X1x, X1y, X2x, X2y, X3x, X3y, X4x, X4y])` list of nodal coordinates. Here we have 4 nodes with an x, and y coordinate for each node.
@@ -77,9 +79,14 @@ Hereby the PyFEMP notation demands that the weak form to be solved
 is directly implemented to the element vector (without changing the sign).
 That means specifically, the element vector $`\boldsymbol{r}_{e}`$ is defined as:
 ```math
-\boldsymbol{r}_{e} = \dfrac{\text{d}}{\text{d} \boldsymbol{d}_{e}} \, G
+\boldsymbol{r}_{e} = \dfrac{\text{d}}{\text{d} \delta \boldsymbol{d}_{e}} \, G
 ```
+with the vector of nodal tests $`\delta \boldsymbol{d}_{e}`$.
 
+Furthermore the element matrix is supposed to be the total derivative of the element vector, w.r.t. the vector of nodal dofs $`\boldsymbol{d}_{e}`$. In the routine this is represented by the `UL` input vector.
+
+
+## Complete code of the `Elmt_KS` routine
 ```python
 def Elmt_KS(XL, UL, Hn, Ht, Mat, dt):
     '''
