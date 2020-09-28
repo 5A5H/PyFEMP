@@ -30,7 +30,7 @@ def SH0_Q1(xi, eta):
             [(1.0+xi)*(1.0+eta),  (1.0+eta),   (1.0+xi)],
             [(1.0-xi)*(1.0+eta), -(1.0+eta),   (1.0-xi)]
         ], dtype=np.float64)
-        
+
 def Elmt_KS(XL, UL, Hn, Ht, Mat, dt):
     '''
     This function returns element vector and matrix.
@@ -106,7 +106,7 @@ def Elmt_KS(XL, UL, Hn, Ht, Mat, dt):
             for J in range(NoElmtNodes):
 
                 # compute nodal stiffness matrix
-                k_e[I*NoNodalDOF+0, J*NoNodalDOF+0] += - a * SHP[J,1:3].dot( SHP[I,1:3])* wgp * detJ
+                k_e[I*NoNodalDOF+0, J*NoNodalDOF+0] += - alpha_q * SHP[J,1:3].dot( SHP[I,1:3])* wgp * detJ
 
     return r_e, k_e
 
