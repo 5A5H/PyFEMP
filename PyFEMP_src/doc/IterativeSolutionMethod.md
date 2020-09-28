@@ -10,5 +10,6 @@ Generally it is assumed that any system of equations to solve, is given in a res
 This system of equations by default is solved iteratively, based on the first order taylor expansion 
 
 ```math
-\boldsymbol{R}(\boldsymbol{d}) + \Delta \boldsymbol{d} \, \dfrac{1}{2} = \boldsymbol{0}.
+\boldsymbol{R}(\boldsymbol{d}) + \Delta \boldsymbol{d} \, \dfrac{\partial \, \boldsymbol{R}}{\partial \, \boldsymbol{d}} = \boldsymbol{0},
 ```
+introducing an incremental change $\boldsymbol{d}$.
