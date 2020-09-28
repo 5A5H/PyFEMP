@@ -26,7 +26,7 @@ The element file must `import numpy as np` in the beginning.
 
 There is no further requirements or restrictions to a element file. You may define addditional function, put comments or else.
 
-# A finite element for the steady state laplace problem
+# A finite element for the steady state Laplace problem
 In the following we will discuss the essential functions to be implemented for computing the laplace problem described above.
 
 # The `Elmt_Init()`
@@ -48,4 +48,20 @@ Here each element node has only one scalar degree of freedom, which is the absol
 Also the list of material parameters is rather short on this example, where we only need the heat conductivity parameter (`ElementMaterialNames = ["alpha_q"]`).
 Postprocessing fields are introduced by a string name per scalar as well, but we'll not go into details here.
 
+# The `Elmt_KS(XL, UL, Hn, Ht, Mat, dt)`
 
+This is the main routine of the finite element, called during the solution procedure. The input is standartized as
+
+ * `XL = np.array([X1x, X1y, X2x, X2y, X3x, X3y, X4x, X4y])` list of nodal coordinates. Here we have 4 nodes with an x, and y coordinate for each node.
+ Hence its size is `NoElementDim * NoElementNodes`.
+ 
+ * `UL = np.array([T1, T2, T3, T4])` list of current dof value. That means, the element gets the current temperature within the iterative scheme as $`\theta = \theta^{t} + \Delta \theta`$ where $`\theta `$ is the temperature in the element, $`\theta^{t}`$ is the value of the temperature at the beginning of the time step (where we don't have equilibrium yet) and $`\Delta \theta`$ is the increment towards equilibrium in the current time step. Its size is `len(ElementDofNames) * NoElementNodes`.
+ 
+ * `Hn`, `Ht` are vectors with the element history variables. `Hn` contain the values at the beginning of the time/load step and `Ht` is its current counter part. Both are of equal size, `NoElementHistory`.
+ 
+ * `Mat` is a vector with the material parameters, in our case with one entry for the conductivity. Generally its size is `len(ElementMaterialNames)`.
+ 
+ * `dt` is a scalar, being the time increment from the beginning of the time step to its end.
+
+
+ >> Note that the lists `XL` and `UL` are always ordered nodewise. For a coupled element with a displacement vector and a temperature as nodal degrees of freedom we would have: `UL = np.array([U1x, U1y, T1, ... , Unx, Uny, Tn])` for `n`- nodes. 
