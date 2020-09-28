@@ -11,5 +11,5 @@ with the heat flux $`\boldsymbol{q} = - \alpha_{q} \,\text{grad} \theta`$. Hereb
 To obtain an approximate solution using the finite element method, we build a weak form using the arbitrary test function $`\delta\theta`$, arriving at
 
 ```math
-G =  \, \boldsymbol{q} \cdot \text{grad}\, \delta \theta \, \text{d}v - \bar{\boldsymbol{q}} \cdot \boldsymbold{n} \, \delta \theta \,\text{d}a
+G =
 ```
