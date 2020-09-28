@@ -12,5 +12,5 @@ To obtain an approximate solution using the finite element method, we build a we
 
 ```math
 G = 
-\int_{\mathcal B} \, \boldsymbol{q} \cdot \text{grad} \, \delta \theta \, \text{d}v - \int_{\partial {\mathcal B}^{q}}
+\int_{\mathcal B} \, \boldsymbol{q} \cdot \text{grad} \, \delta \theta \, \text{d}v - \int_{\partial {\mathcal B}^{q}} \, \bar{\boldsymbol{q}}
 ```
