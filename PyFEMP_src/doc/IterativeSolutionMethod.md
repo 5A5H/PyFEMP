@@ -12,4 +12,4 @@ This system of equations by default is solved iteratively, based on the first or
 ```math
 \boldsymbol{R}(\boldsymbol{d}) + \Delta \boldsymbol{d} \, \dfrac{\text{d} \boldsymbol{R}}{\text{d} \boldsymbol{d}} = \boldsymbol{0},
 ```
-introducing an incremental change `$\boldsymbol{d}`$.
+introducing an incremental change $`\boldsymbol{d}`$.
