@@ -389,7 +389,7 @@ class FEM_Simulation:
             print('Lin EqS LHS :')
             print(LHS)
 
-        return RHS, LHS, I_red
+        return RHS, LHS, I_red 
 
 
 
