@@ -24,7 +24,7 @@ A finite element for usage in PyFEMP is a single python file which defines three
 
 The element file must `import numpy as np` in the beginning.
 
-There is no further requirements or restrictions to a element file. You may define addditional function, put comments or else.
+There is no further requirements or restrictions to a element file. You may define addditional function, put comments or else. Especially feel free to add some `print()` statements if you are curious about something.
 
 # A finite element for the steady state Laplace problem
 In the following we will discuss the essential functions to be implemented for computing the laplace problem described above.
