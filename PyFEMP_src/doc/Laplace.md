@@ -76,7 +76,7 @@ Using the standard element procedure the element vector and matrix are computed,
 ```
 
 Hereby the PyFEMP notation demands that the weak form to be solved
-is directly implemented to the element vector (without changing the sign).
+is directly implemented to the element vector (**without changing the sign**).
 That means specifically, the element vector $`\boldsymbol{r}_{e}`$ is defined as:
 
 ```math
@@ -89,6 +89,20 @@ Furthermore the element matrix is supposed to be the total derivative of the ele
 ```math
 \boldsymbol{k}_{e} = \dfrac{\text{d}}{\text{d} \boldsymbol{d}_{e}} \, \boldsymbol{r}_{e}
 ```
+
+For the Laplace problem, that whould be:
+
+```math
+\boldsymbol{r}_{e}^{I} = \omega_{gp} \, detJ \, \boldsymbol{q} \cdot \text{grad} N^{I} 
+```
+
+and 
+
+```math
+\boldsymbol{k}_{e}^{I} =- \omega_{gp} \, detJ \, \alpha_{q} \, \text{grad} N^{I} \cdot \text{grad} N^{I}
+```
+
+with $` \omega_{gp}`$ denoting the integration point weight in the numerical integration scheme, $`detJ`$ the deterinant of the mapping into the integration space, $`N`$ the shape function defined in the integration space for each node, idexed by $`I`$.
 
 
 ## Complete code of the `Elmt_KS` routine
