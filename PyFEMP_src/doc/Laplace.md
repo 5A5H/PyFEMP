@@ -11,5 +11,6 @@ with the heat flux $`\boldsymbol{q} = - \alpha_{q} \,\text{grad} \theta`$. Hereb
 To obtain an approximate solution using the finite element method, we build a weak form using the arbitrary test function $`\delta\theta`$, arriving at
 
 ```math
-G = \int_{\mathcal B} \, \boldsymbol{q} \cdot \text{grad}
+G = 
+\int_{\mathcal B} \, \boldsymbol{q} \cdot \text{grad} \, \delta \theta \, \text{d}v
 ```
