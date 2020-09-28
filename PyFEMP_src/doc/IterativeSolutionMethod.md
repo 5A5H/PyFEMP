@@ -24,7 +24,7 @@ Applying this definition of the residual function to the iterative scheme
 
 ```math
 \boldsymbol{F} - \boldsymbol{P}(\boldsymbol{d}) +
-\dfrac{\text{d} \boldsymbol{R}}{\text{d} \boldsymbol{d}} \, \Delta \boldsymbol{d}  = \boldsymbol{0},
+\dfrac{\text{d} \boldsymbol{P}}{\text{d} \boldsymbol{d}} \, \Delta \boldsymbol{d}  = \boldsymbol{0},
 ```
 
 we obtain the actually solved linear system
@@ -36,7 +36,7 @@ we obtain the actually solved linear system
 introducing the consistent tangent
 
 ```math
-\boldsymbol{K} = - \dfrac{\text{d} \boldsymbol{R}}{\text{d} \boldsymbol{d}}.
+\boldsymbol{K} = - \dfrac{\text{d} \boldsymbol{P}}{\text{d} \boldsymbol{d}}.
 ```
 
 
