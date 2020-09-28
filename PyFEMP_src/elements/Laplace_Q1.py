@@ -2,6 +2,9 @@ import numpy as np
 
 
 def Elmt_Init():
+    '''
+    The initialization function of a PyFEMP element.
+    '''
     NoElementDim = 2                    # Number of dimensions
     NoElementNodes = 4                  # Number of nodes on the element (here: 4-Node Quadirlateral)
     NoElementHistory = 0                # Number of history variables
@@ -10,9 +13,33 @@ def Elmt_Init():
     ElementPostNames = ["T"]            # Element postprocessing parameters
     return NoElementDim, NoElementNodes, ElementDofNames, NoElementHistory, ElementMaterialNames, ElementPostNames      
     
-
+def SH0_Q1(xi, eta):
+    '''
+    SH0_Q1(xi, eta) -> SH0
+    Return a two dimensional array containing shape functions and derivatives for Q1 element.
+    Usage: SH0( NodeNumber, SHPIndex)  
+    with SHPIndex = {
+        0 -> shape function, 
+        1 -> derived shape function w.r.t. xi, 
+        2 -> derived shape function w.r.t. eta
+        } 
+    '''
+    return 1/4 * np.array([
+            [(1.0-xi)*(1.0-eta), -(1.0-eta),  -(1.0-xi)],
+            [(1.0+xi)*(1.0-eta),  (1.0-eta),  -(1.0+xi)],
+            [(1.0+xi)*(1.0+eta),  (1.0+eta),   (1.0+xi)],
+            [(1.0-xi)*(1.0+eta), -(1.0+eta),   (1.0-xi)]
+        ], dtype=np.float64)
+        
 def Elmt_KS(XL, UL, Hn, Ht, Mat, dt):
     '''
+    This function returns element vector and matrix.
+    Generally the element matrix is the straight derivative
+    of the element vector with respect to the nodal degrees of freedoms,
+    in the order of the UL field.
+    Both need to be returned as numpy arrays, with dimensions: 
+    element vector r_e : number of nodal degrees of freedom times number of nodes
+    element matrix k_e : NoNodes * NoNodalDOF ,NoNodes * NoNodalDOF
     '''
     verbose = False  # True;
     if verbose: print('XI :',XL)
@@ -87,7 +114,7 @@ def Elmt_KS(XL, UL, Hn, Ht, Mat, dt):
 def Elmt_Post(XL, UL, Hn, Ht, Mat, dt, PostName):
     '''
     '''
-    elif (PostName=="T"):
+    if (PostName=="T"):
         r_post = np.array([UL[0], UL[1], UL[2], UL[3]])
         return r_post
     else:

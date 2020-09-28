@@ -9,7 +9,7 @@ class FEM_Simulation:
     Object that represents a 1D FEM Simulation.
     '''
 
-    def __init__(self, Element):
+    def __init__(self, Element, verbose=False):
 
         self.Element = Element
 
@@ -25,7 +25,7 @@ class FEM_Simulation:
         self.NoNodeDofs = len(self.ElementDofNames)
 
         # general program variables
-        self.verbose = False
+        self.verbose = verbose
         self.verbose_system = True
         self.state = 0
 
@@ -61,6 +61,12 @@ class FEM_Simulation:
 
         # make some noise
         print("FEM Solver Instance Created")
+        if (self.verbose): print("Simulation dimensions:                    ", self.NoElementDim)
+        if (self.verbose): print("Number of element nodes:                  ", self.NoElementNodes)
+        if (self.verbose): print("Names of nodal degrees of freedom:        ", self.ElementDofNames)
+        if (self.verbose): print("Names of element parameters:              ", self.ElementMaterialNames)
+        if (self.verbose): print("Names of available postprocessing fields: ", self.ElementPostNames)
+
 
 
 
@@ -81,10 +87,10 @@ class FEM_Simulation:
 
         no_mesh_el, mesh_no_el = ElementConnectivity.shape
 
-        if (verbose): print('Mesh NoNodes          : ',no_mesh_no)
-        if (verbose): print('Mesh Dimension        : ',mesh_dim)
-        if (verbose): print('Mesh NoElements       : ',no_mesh_el)
-        if (verbose): print('Mesh Nodes per Element: ',mesh_no_el)
+        if (self.verbose or verbose): print('Mesh NoNodes          : ',no_mesh_no)
+        if (self.verbose or verbose): print('Mesh Dimension        : ',mesh_dim)
+        if (self.verbose or verbose): print('Mesh NoElements       : ',no_mesh_el)
+        if (self.verbose or verbose): print('Mesh Nodes per Element: ',mesh_no_el)
 
         if (self.NoElementDim != mesh_dim): raise NameError('Mesh dimension is not the same as elements.')
         if (self.NoElementNodes != mesh_no_el): raise NameError('Mesh is not compatible to element topology.')
@@ -98,7 +104,7 @@ class FEM_Simulation:
         self.XI   = np.array(NodesList, dtype=np.float64)
         self.ELEM = np.array(ElementConnectivity, dtype=np.uint)
 
-        if (self.verbose): print(' Finite Elemenmt Mesh Read!')
+        if (self.verbose or self.verbose): print(' Finite Elemenmt Mesh Read!')
         self.state = 1
 
 
@@ -388,6 +394,10 @@ class FEM_Simulation:
 
 
     def NewtonIteration(self):
+        '''
+        Performes a NewtonIteration on the current state of the system.
+        Returns a convergence indicator: sqrt(|R|*|dDI|)
+        '''
         RHS, LHS, I_red = self.FormLinearSystem()
         Residual = np.sqrt(RHS.dot(RHS))
         if (self.verbose_system):
