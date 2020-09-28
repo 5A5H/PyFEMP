@@ -14,3 +14,38 @@ To obtain an approximate solution using the finite element method, we build a we
 G = 
 \int_{\mathcal B} \, \boldsymbol{q} \cdot \text{grad} \, \delta \theta \, \text{d}v - \int_{\partial {\mathcal B}^{q}} \, \bar{\boldsymbol{q}} \cdot \boldsymbol{n} \, \delta \theta \,\text{d}a
 ```
+where $`\bar{\boldsymbol{q}} \cdot \boldsymbol{n}`$ is the applied, heat flux on the free boundary (no essential/dirichlet condition) $`\partial {\mathcal B}^{q}`$. Remark: A positive value ($`\bar{\boldsymbol{q}} \cdot \boldsymbol{n} > 0`$) does indicate a heatflux out of the body, due to the definition of the outward pointing normal $`\boldsymbol{n}`$.
+
+# PyFEMP - Finite elements
+A finite element for usage in PyFEMP is a single python file which defines three functions:
+ * `Elmt_Init()` which tells PyFEMP about the Layout of the element (e.g. names/numbers of nodal degrees of freedom, shape, material parameters)
+ * `Elmt_KS(XL, UL, Hn, Ht, Mat, dt)` for computing element vector and matrix
+ * `Elmt_Post(XL, UL, Hn, Ht, Mat, dt, PostName)` for computing postprocessing vectors containing a value for each node
+
+The element file must `import numpy as np` in the beginning.
+
+There is no further requirements or restrictions to a element file. You may define addditional function, put comments or else.
+
+# A finite element for the steady state laplace problem
+In the following we will discuss the essential functions to be implemented for computing the laplace problem described above.
+
+# The `Elmt_Init()`
+This function is called by PyFEMP in the beginning and tells a simulation about the element properties.
+```
+def Elmt_Init():
+    NoElementDim = 2                    # Number of dimensions
+    NoElementNodes = 4                  # Number of nodes on the element (here: 4-Node Quadirlateral)
+    NoElementHistory = 0                # Number of history variables
+    ElementDofNames = ["T"]             # Element degrees of freedom specified by a string for each scalar
+    ElementMaterialNames = ["alpha_q"]  # Element material parameters specified by a string for each scalar
+    ElementPostNames = ["T"]            # Element postprocessing parameters
+    return NoElementDim, NoElementNodes, ElementDofNames, NoElementHistory, ElementMaterialNames, ElementPostNames
+```
+
+In this example we will build a 4-node quadiralteral element (`NoElementNodes = 4`) for a 2D (`NoElementDim = 2`) analysis. As we have a steady state problem, we don't have any requirement for element history variables (`NoElementHistory = 0`). 
+In PyFEMP it is assumed that each node of an element carries the same number of scalar degrees of freedom. In the `Elmt_Init()` function these are specified by a string, which will also be used during the analysis (see: XX).
+Here each element node has only one scalar degree of freedom, which is the absolute temperature (`ElementDofNames = ["T"]`). 
+Also the list of material parameters is rather short on this example, where we only need the heat conductivity parameter (`ElementMaterialNames = ["alpha_q"]`).
+Postprocessing fields are introduced by a string name per scalar as well, but we'll not go into details here.
+
+
