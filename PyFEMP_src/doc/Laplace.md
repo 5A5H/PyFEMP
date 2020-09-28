@@ -78,12 +78,17 @@ Using the standard element procedure the element vector and matrix are computed,
 Hereby the PyFEMP notation demands that the weak form to be solved
 is directly implemented to the element vector (without changing the sign).
 That means specifically, the element vector $`\boldsymbol{r}_{e}`$ is defined as:
+
 ```math
 \boldsymbol{r}_{e} = \dfrac{\text{d}}{\text{d} \delta \boldsymbol{d}_{e}} \, G
 ```
 with the vector of nodal tests $`\delta \boldsymbol{d}_{e}`$.
 
 Furthermore the element matrix is supposed to be the total derivative of the element vector, w.r.t. the vector of nodal dofs $`\boldsymbol{d}_{e}`$. In the routine this is represented by the `UL` input vector.
+
+```math
+\boldsymbol{k}_{e} = \dfrac{\text{d}}{\text{d} \boldsymbol{d}_{e}} \, \boldsymbol{r}_{e}
+```
 
 
 ## Complete code of the `Elmt_KS` routine
