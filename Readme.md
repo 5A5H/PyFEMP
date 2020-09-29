@@ -27,13 +27,10 @@
  >> https://www.anaconda.com/products/individual
 
 ## Installation
-Once downloaded this project you just need to execute the setup script and should be ready to run:
+The package is available to be installed via pip:
 ```
-python setup.py
+pip install --upgrade PyFEMP
 ```
->> Remark: For **updating** PyFEMP just download the new project and run the setup script again. It always overwrites!
-
-More information will follow in the documentation.
 
 # Usage
 Once succesfully installed you can start by surveying and running the examples, e.g.
