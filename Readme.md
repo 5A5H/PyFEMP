@@ -1,7 +1,7 @@
 # **PyFEMP** **Py**thon **F**inite **E**lement **P**rogram
  PyFEMP (Python Finite Element Program) is a simple Finite Element program written in python. Its focus is on simplicity **not** on performance.
 
-![Canti](PyFEMP_src/assets/canti.png?raw=true "Dynamic analysis of a cantilever")
+![Canti](PyFEMP/assets/canti.png?raw=true "Dynamic analysis of a cantilever")
 
  It should be easy to use, to understand and as portable as possible to be used in teaching. We aim to void overhead w.r.t. environmental setup (compiler, libraries, e.t.c. ...) or dealing with complex structures, to focus on the essense of the FEM.
 
@@ -38,7 +38,7 @@ Once succesfully installed you can start by surveying and running the examples, 
 python cook.py
 ```
 
- ![Canti](PyFEMP_src/assets/cook.png?raw=true "Dynamic analysis of a cantilever")
+ ![Canti](PyFEMP/assets/cook.png?raw=true "Dynamic analysis of a cantilever")
 
 ## Function Reference
 * functions of `PyFEMP`:
