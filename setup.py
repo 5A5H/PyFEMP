@@ -1,11 +1,11 @@
 import setuptools
 
-with open("Readme.md", "r") as fh:
+with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="PyFEMP",
-    version="0.0.2",
+    version="0.0.4",
     author="Sascha F. Maassen",
     author_email="sascha.maassen@uni-due.de",
     description="A python FEM solver for educational purposes.",
