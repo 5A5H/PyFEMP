@@ -120,3 +120,21 @@ data, one scalar for each node.
 ```
 CallElementPost(self, i, PostName) -> elmt_nodes, r_post_e
 ```
+
+## Developer Notes
+How to build the PyPi package from source, and upload/update it on PyPi to make it available via pip:
+
+A version difference need to be specified in the ```setup.py``` file.
+Currently, the files included in the package are detected automatically during build, as part of the standard python module structure.
+The commands to re-build the package are:
+```
+python -m build
+```
+Now the packages are created.
+To upload the package do:
+```
+twine upload dist/*
+```
+and use the PyPi login as requested.
+
+The whole process sometimes require deleting previous build folders or de-installation of previous PyFEMP version.
