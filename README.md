@@ -121,6 +121,46 @@ data, one scalar for each node.
 CallElementPost(self, i, PostName) -> elmt_nodes, r_post_e
 ```
 
+**PostProcessing**
+Returns a list of nodes and a list of 
+one requested scalar for each of these nodes.
+The requested scalar is computed from the element 
+subroutine "Elmt_Post" by PostName.
+By default, the PostName field is returned for all mesh nodes.
+Optionally, specify arbitrary positions for which to evaluate the PostNames.
+x -> matrix that contains the nodal positions
+p -> vector of values for each node
+```
+PostProcessing("UX") -> x, p
+PostProcessing("UX", [0.0, 0.0]) -> [0.0, 0.0], p
+PostProcessing("UX", [[0.0, 0.0],...,[1.0, 0.0]]) -> [[0.0, 0.0],...,[1.0, 0.0]], p
+```
+
+
+## Using external meshes
+External meshes can be used. Required is the input to the Add_Mesh command, as schown in the example ```plate.py```.
+For PyFEMP it does not matter where the data come from,
+once they are available in python they can be used.
+**Attention**: The element connectivity requires indexing starting with **0**.
+An example on exporting a T1 mesh from AceFEM/Mathematica is:
+```
+<< AceFEM`;
+SMTInputData[];
+SMTAddDomain[{"\[CapitalOmega]", {"ML:", "SE", "PE", "T1", "DF", "LE",
+     "T1", "D", "Hooke"}, {"E *" -> 1000, "\[Nu] *" -> 0.3}}];
+mesh = ToElementMesh[
+   ImplicitRegion[x^2 + y^2 > 0.5, {x, y}], {{-1, 1}, {-1, 1}}, 
+   "MeshOrder" -> 1, MaxCellMeasure -> 3, AccuracyGoal -> 1];
+SMTAddMesh[mesh, "\[CapitalOmega]"];
+SMTAnalysis[];
+SMTShowMesh[]
+XI = SMTNodeData[All, "X"];
+Elmt = SMTElements[[;; , 3]];
+Export["path/nodes.csv", XI];
+Export["path/elmt.csv", Elmt - 1];
+```
+Notice the ```-1``` in the export for the element file, which translates to **0** indexing.
+
 ## Developer Notes
 How to build the PyPi package from source, and upload/update it on PyPi to make it available via pip:
 
@@ -133,7 +173,7 @@ python -m build
 Now the packages are created.
 To upload the package do:
 ```
-twine upload dist/*
+python -m twine upload dist/*
 ```
 and use the PyPi login as requested.
 

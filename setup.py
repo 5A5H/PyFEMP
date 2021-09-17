@@ -5,14 +5,19 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="PyFEMP",
-    version="0.0.4",
+    version="0.0.6",
     author="Sascha F. Maassen",
     author_email="sascha.maassen@uni-due.de",
     description="A python FEM solver for educational purposes.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://git.uni-due.de/mechanik/py_femp",
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages("."),
+    package_dir={"": "."},
+    package_data={
+        "PyFEMP": ["assets/*.png"],
+        "PyFEMP": ["assets/plate_with_hole/*.csv"],
+    },
     project_urls={
         'Wiki' : 'https://git.uni-due.de/mechanik/py_femp/-/wikis/home'
     },

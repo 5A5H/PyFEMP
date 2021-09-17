@@ -1,4 +1,5 @@
 # Class version of 1D Solver
+from sys import dont_write_bytecode
 import numpy as np
 import matplotlib as mpl
 import warnings
@@ -501,20 +502,59 @@ class FEM_Simulation:
 
 
 
-    def PostProcessing(self, PostName):
+    def PostProcessing(self, PostName, points = []):
         '''
         Returns a list of nodes and a list of 
         one requested scalar for each of these nodes.
         The requested scalar is computed from the element 
-        subroutine "Elmt_Post".
+        subroutine "Elmt_Post" by PostName.
+        By default, the PostName field is returned for all mesh nodes.
+        x -> matrix that contains the nodal positions
+        p -> vector of values for each node
+        Example:
+            PostProcessing("UX") -> x, p
+        Optionally, specify arbitrary positions for which to evaluate the PostNames
+        Examples:
+            PostProcessing("UX", [0.0, 0.0]) -> x, p
+            PostProcessing("UX", [[0.0, 0.0],...,[1.0, 0.0]]) -> x, p
         '''
+        import matplotlib.tri as mtri
         if PostName not in self.ElementPostNames: 
             print('Warning, PostName not available.')
             print('Choose from: ') 
             print( [str(name)+", " for name in self.ElementPostNames])
             return
-        post_vector = self.Assemble_Post(PostName)
-        return self.XI.copy(), post_vector
+        if (len(points)==0):
+            post_vector = self.Assemble_Post(PostName)
+            return self.XI.copy(), post_vector
+        else:
+            # assume points is an input of points
+            if (self.NoElementDim==2):
+                post_vector = self.Assemble_Post(PostName)
+                if (self.NoElementNodes==3):
+                    XI = self.XI
+                    Elmt = self.ELEM
+                elif (self.NoElementNodes==4):
+                    XI = self.XI
+                    Elmt = np.array([[elmt[0], elmt[1], elmt[3], elmt[1], elmt[2], elmt[3]] for elmt in self.ELEM] ,dtype=np.uint)
+                    Elmt = Elmt.reshape(-1,3)
+                else:
+                    raise NameError('Error! No 2D postprocessing for :'+str(self.NoElementNodes)+' nodes')
+
+                mesh = mtri.Triangulation(XI[:,0], XI[:,1], Elmt)
+                interpolated_data = mtri.LinearTriInterpolator(mesh, post_vector)
+
+                if (len(np.shape(points))==1): # single point
+                    post_vector = interpolated_data(points[0], points[1])
+                else:
+                    post_vector = interpolated_data(points[:,0], points[:,1])
+
+                return points, post_vector.filled(0.0)
+
+                
+            else:
+                raise NameError('Error! No xD postprocessing for :'+str(self.NoElementNodes)+' nodes')
+                return 0, 0
 
 
 
