@@ -453,6 +453,11 @@ class FEM_Simulation:
 
 
     def CallElementPost(self, i, PostName):
+        '''
+        Calls the postprocessing routine Elmt_Post for element i with the current Simulation fields.
+        Returns first a list of all elment node indexes and next the vector with the requested PostName
+        data, one scalar for each node.
+        '''
         if i > self.NoElements:
             print('Error: Input exceeds number of elements. max is : %i8' %
                   self.NoElements)
@@ -463,7 +468,7 @@ class FEM_Simulation:
         Elmt_XI = (self.XI[elmt_nodes]).flatten()
         Elmt_UI = self.DI[elmt_dof_indexes]
         Elmt_Hn = self.h_n[elmt_hist_indexes]
-        Elmt_Ht = np.zeros(self.NoElementHistory)
+        Elmt_Ht = self.h_t[elmt_hist_indexes]
         Elmt_Mat = self.ElementMaterial[i]
 
         # call element routine to get element vector / element matrix

@@ -64,44 +64,59 @@ The `PyFEMP.FEM_Simulation` object represents your FEM Simulation. It provides t
 methods to e.g. introduce the mesh and boundary conditions i.e the discretized boundary 
 value problem, but also to perform solution procedures on it.
 
+### FEM_Simulation properties
+Persistant Data provided by the FEM_Simulation object.
 ```
-        self.NoElementMaterial = len(self.ElementMaterialNames)
-        self.NoNodeDofs = len(self.ElementDofNames)
+FEM_Simulation.NoElementDim                  # dimensions of this simulation
+FEM_Simulation.NoElementNodes                # number of nodes for each element in the current simulation
+FEM_Simulation.ElementDofNames               # vector with strings of names for nodal degrees of freedom
+FEM_Simulation.NoElementHistory              # length of element history fields in the current simulation
+FEM_Simulation.ElementMaterialNames          # vector with strings of material parameter names           
+FEM_Simulation.ElementPostNames              # vector with strings of postprocessing names
+FEM_Simulation.NoElementMaterial             # number of material parameters for each element
+FEM_Simulation.NoNodeDofs                    # number of degrees of freedom per node in the current simulation
 
-        # general program variables
-        self.verbose = verbose
-        self.verbose_system = True
-        self.state = 0
+# general program variables
+FEM_Simulation.verbose                        # verbose flag
+FEM_Simulation.verbose_system                 # verbose flag
+FEM_Simulation.state                          # current simulation state identifier
 
-        # general discretization variables
-        self.time = 0.0                     # current time
-        self.dt = 1.0                       # time increment gone frome last time
-        self.step = 0                       # current step
-        self.lambda_load = 0                # global load multiplier
-        self.NoElements = 0                 # number of elements
-        self.NoNodes = 0                    # number of nodes
-        self.NoDofs = 0                     # number of degrees of freedom
-        self.XI = 0                         # nodal coordinates
-        self.ELEM = 0                       # element connectivity
-        self.h_n = 0                        # previous history field
-        self.h_t = 0                        # current history field
+# general discretization variables
+FEM_Simulation.time                          # current time
+FEM_Simulation.dt                            # time increment gone frome last time
+FEM_Simulation.step                          # current step
+FEM_Simulation.lambda_load                   # global load multiplier
+FEM_Simulation.NoElements                    # number of elements
+FEM_Simulation.NoNodes                       # number of nodes
+FEM_Simulation.NoDofs                        # number of degrees of freedom
+FEM_Simulation.XI                            # nodal coordinates
+FEM_Simulation.ELEM                          # element connectivity
+FEM_Simulation.h_n                           # previous history field
+FEM_Simulation.h_t                           # current history field
 
-        # initialize fields for boundary conditions
-        self.NBC = []                       # python list to collect natural boundary conditions before analysis
-        self.NBC_Indexes = 0                # vector of indexes to the external load vector where a nbc is present
-        self.NBC_Values = 0                 # vector of values to be placed in the external load vector for each nbc index
-        self.EBC = []                       # python list to collect essential boundary conditions before analysis
-        self.EBC_Indexes = 0                # vector of indexes of constrained degrees of freedom
-        self.EBC_Values = 0                 # vector of values for each constrained degree of freedom
-        self.NoEquations = 0                # number of all unconstrained dofs
+# initialize fields for boundary conditions
+FEM_Simulation.NBC = []                       # python list to collect natural boundary conditions before analysis
+FEM_Simulation.NBC_Indexes = 0                # vector of indexes to the external load vector where a nbc is present
+FEM_Simulation.NBC_Values = 0                 # vector of values to be placed in the external load vector for each nbc index
+FEM_Simulation.EBC = []                       # python list to collect essential boundary conditions before analysis
+FEM_Simulation.EBC_Indexes = 0                # vector of indexes of constrained degrees of freedom
+FEM_Simulation.EBC_Values = 0                 # vector of values for each constrained degree of freedom
+FEM_Simulation.NoEquations = 0                # number of all unconstrained dofs
 
-        # element discretization parameter
-        self.ElementMaterial = []           # list of material parameter
-        self.h_n = 0                        # vector of element history field of t=t   (previous)
-        self.h_t = 0                        # vector of element history field of t=t+1 (current)
-        self.DI = 0                         # vector of degrees of freedom
-        self.R_ext = 0                      # vector of external forces
+# element discretization parameter
+FEM_Simulation.ElementMaterial = []           # list of material parameter
+FEM_Simulation.h_n = 0                        # vector of element history field of t=t   (previous)
+FEM_Simulation.h_t = 0                        # vector of element history field of t=t+1 (current)
+FEM_Simulation.DI = 0                         # vector of degrees of freedom
+FEM_Simulation.R_ext = 0                      # vector of external forces
 ```
 
-### properties
+### FEM_Simulation functions
 
+**CallElementPost**
+Calls the postprocessing routine Elmt_Post for element i with the current Simulation fields.
+Returns first a list of all elment node indexes and next the vector with the requested PostName
+data, one scalar for each node.
+```
+CallElementPost(self, i, PostName) -> elmt_nodes, r_post_e
+```
