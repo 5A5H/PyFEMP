@@ -64,5 +64,44 @@ The `PyFEMP.FEM_Simulation` object represents your FEM Simulation. It provides t
 methods to e.g. introduce the mesh and boundary conditions i.e the discretized boundary 
 value problem, but also to perform solution procedures on it.
 
+```
+        self.NoElementMaterial = len(self.ElementMaterialNames)
+        self.NoNodeDofs = len(self.ElementDofNames)
+
+        # general program variables
+        self.verbose = verbose
+        self.verbose_system = True
+        self.state = 0
+
+        # general discretization variables
+        self.time = 0.0                     # current time
+        self.dt = 1.0                       # time increment gone frome last time
+        self.step = 0                       # current step
+        self.lambda_load = 0                # global load multiplier
+        self.NoElements = 0                 # number of elements
+        self.NoNodes = 0                    # number of nodes
+        self.NoDofs = 0                     # number of degrees of freedom
+        self.XI = 0                         # nodal coordinates
+        self.ELEM = 0                       # element connectivity
+        self.h_n = 0                        # previous history field
+        self.h_t = 0                        # current history field
+
+        # initialize fields for boundary conditions
+        self.NBC = []                       # python list to collect natural boundary conditions before analysis
+        self.NBC_Indexes = 0                # vector of indexes to the external load vector where a nbc is present
+        self.NBC_Values = 0                 # vector of values to be placed in the external load vector for each nbc index
+        self.EBC = []                       # python list to collect essential boundary conditions before analysis
+        self.EBC_Indexes = 0                # vector of indexes of constrained degrees of freedom
+        self.EBC_Values = 0                 # vector of values for each constrained degree of freedom
+        self.NoEquations = 0                # number of all unconstrained dofs
+
+        # element discretization parameter
+        self.ElementMaterial = []           # list of material parameter
+        self.h_n = 0                        # vector of element history field of t=t   (previous)
+        self.h_t = 0                        # vector of element history field of t=t+1 (current)
+        self.DI = 0                         # vector of degrees of freedom
+        self.R_ext = 0                      # vector of external forces
+```
+
 ### properties
 
