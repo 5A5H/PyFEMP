@@ -316,7 +316,7 @@ class FEM_Simulation:
         Elmt_XI = (self.XI[elmt_nodes]).flatten()
         Elmt_UI = self.DI[elmt_dof_indexes]
         Elmt_Hn = self.h_n[elmt_hist_indexes]
-        Elmt_Ht = np.zeros(self.NoElementHistory)
+        Elmt_Ht = self.h_t[elmt_hist_indexes]
         Elmt_Mat = self.ElementMaterial[i]
         if (self.verbose or verbose):
             print('Calling  : ', i)
