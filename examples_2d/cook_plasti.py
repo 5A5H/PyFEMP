@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import PyFEMP
-import T1_J2 as ELEMENT
+import PyFEMP.elements.T1_J2 as ELEMENT
 
 FEM = PyFEMP.FEM_Simulation(ELEMENT)
 n, sig = 10, 100

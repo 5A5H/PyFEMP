@@ -558,10 +558,10 @@ class FEM_Simulation:
 
 
 
-    def ShowMesh(self, ax, deformedmesh = False, PostName = "", **kwargs):
+    def ShowMesh(self, ax, deformedmesh = False, boundaryconditions = False, PostName = "", **kwargs):
         '''
         Visualisation of Mesh and solution.
-        ShowMesh(self, ax, deformedmesh = False, PostName = "", **kwargs) -> plot
+        ShowMesh(self, ax, deformedmesh = False, boundaryconditions = False, PostName = "", **kwargs) -> plot
         The function takes a matplotlit figure axis as arguments and plots inside the same.
         The option deformedmesh = False can be used to plot the deformed mesh, where
         nodal displacement is supposed to be the n.th first nodal degrees of freedom
@@ -619,7 +619,6 @@ class FEM_Simulation:
                     levels = 5
                     postplot = ax.tricontourf(XI[:,0], XI[:,1], post_vector, levels, triangles=self.ELEM, **kwargs, cmap='jet')
                     warnings.filterwarnings("default")
-                    return postplot
 
                 
 
@@ -672,10 +671,55 @@ class FEM_Simulation:
                     levels = 5
                     postplot = ax.tricontourf(XI[:,0], XI[:,1], post_vector, levels, triangles=triangulation_for_Q1, **kwargs)
                     warnings.filterwarnings("default")
-                    return postplot
 
             else:
                 raise NameError('Error! No 2D visualisation for :'+str(self.NoElementNodes)+' nodes')
+
+            if (boundaryconditions):
+                dofs_per_node = self.NoNodeDofs
+                if (dofs_per_node>7): 
+                    raise NameError("Error! Visualisation of boundaray conditions for so many dofs not supported!")
+
+                class bc_vis:
+                    def __init__(self):
+                        self.x = []
+                        self.y = []
+
+                ebc_label=['EBC DOF 0', 'EBC DOF 1', 'EBC DOF 2', 'EBC DOF 3', 'EBC DOF 4', 'EBC DOF 5', 'EBC DOF 6']
+                ebc_marker=['v', '^', 'D', 's', 'p', '+', '*']
+                ebc_visualisations = [bc_vis() for i in range(dofs_per_node)]
+                for ebc in self.EBC:
+                    affected_node = ebc[0]
+                    affected_dof = ebc[1]
+                    affected_XI = XI[affected_node] # is provided by steps before also in deformed version
+                    ebc_visualisations[affected_dof].x.append(affected_XI[0])
+                    ebc_visualisations[affected_dof].y.append(affected_XI[1])
+
+                nbc_label=['NBC DOF 0', 'NBC DOF 1', 'NBC DOF 2', 'NBC DOF 3', 'NBC DOF 4', 'NBC DOF 5', 'NBC DOF 6']
+                nbc_marker=["4", "2", 'D', 's', 'p', '+', '*']
+                nbc_visualisations = [bc_vis() for i in range(dofs_per_node)]
+                for nbc in self.NBC:
+                    affected_node = nbc[0]
+                    affected_dof = nbc[1]
+                    affected_XI = XI[affected_node]
+                    nbc_visualisations[affected_dof].x.append(affected_XI[0])
+                    nbc_visualisations[affected_dof].y.append(affected_XI[1])
+
+                for i in range(dofs_per_node):
+                    ax.plot(
+                        ebc_visualisations[i].x, 
+                        ebc_visualisations[i].y, 
+                        markeredgecolor='red', marker=ebc_marker[i], 
+                        linestyle='None', markerfacecolor='None', label=ebc_label[i])
+                for i in range(dofs_per_node):
+                    ax.plot(
+                        nbc_visualisations[i].x, 
+                        nbc_visualisations[i].y, 
+                        markeredgecolor='blue', marker=nbc_marker[i], 
+                        linestyle='None', markerfacecolor='None', label=nbc_label[i])
+
+            return postplot
+
 
         else: 
             raise NameError("Error! Visualisation not supported!")

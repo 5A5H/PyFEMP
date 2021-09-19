@@ -5,8 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import PyFEMP
-#import PyFEMP.elements.LE_T1 as ELEMENT
-import T1_J2 as ELEMENT
+import PyFEMP.elements.T1_J2 as ELEMENT
 
 FEM = PyFEMP.FEM_Simulation(ELEMENT)
 # Here we chose one of three pais of node and element files
