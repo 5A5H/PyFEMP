@@ -209,7 +209,6 @@ def Elmt_KS(XL, UL, Hn, Ht, Mat, dt):
             sig = np.einsum('ij,j->i', Cmat, eps_el)
 
             # modification of material tangent
-#            Cmat += -2*mue*(phi_tr/norm_dev_sig_tr)*PP - 2.0*mue*(1.0-(phi_tr/norm_dev_sig_tr))*np.einsum('i,j->ij', n_tr, n_tr)
             fact1 = 1.0 - (2.0*mue*delta_a/norm_dev_sig_tr)
             fact2 = 2.0*mue/(2.0*mue + (2.0/3.0*kh)) - (2.0*mue*delta_a/norm_dev_sig_tr)
             Cmat += -2.0*mue*PP \
