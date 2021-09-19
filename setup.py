@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="PyFEMP",
-    version="0.0.6",
+    version="0.0.9",
     author="Sascha F. Maassen",
     author_email="sascha.maassen@uni-due.de",
     description="A python FEM solver for educational purposes.",
