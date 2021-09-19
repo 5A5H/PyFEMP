@@ -574,6 +574,8 @@ class FEM_Simulation:
 
         if (self.NoElementDim==2):
             # 2D Visualisation
+
+            postplot = 0
             
             if (self.NoElementNodes==3):
                 #  visualisation of T1

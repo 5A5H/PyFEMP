@@ -178,3 +178,8 @@ python -m twine upload dist/*
 and use the PyPi login as requested.
 
 The whole process sometimes require deleting previous build folders or de-installation of previous PyFEMP version.
+
+It is also possible to install the local repository after it has been build via
+```
+python -m pip install .
+```
