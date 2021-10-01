@@ -27,10 +27,15 @@
  >> https://www.anaconda.com/products/individual
 
 ## Installation
-The package is available to be installed via pip:
+The package is available to be installed via pip (inside a python session):
 ```
 pip install --upgrade PyFEMP
 ```
+An alternative (inside a shell terminal) whould be:
+```
+python -m pip install --upgrade PyFEMP
+```
+inside a terminal rather than inside python.
 
 # Usage
 Once succesfully installed you can start by surveying and running the examples, e.g.
